@@ -81,56 +81,86 @@ IMPORTANT: I need you to actually search the internet for this information. Look
 - Financial news sites (TechCrunch, Bloomberg, Reuters, etc.)
 - Investment databases (Crunchbase, PitchBook, etc.)
 
-For each year where you find valuation data, please provide EXACTLY this format:
+Please return your response as a valid JSON object with this EXACT structure:
 
-YEAR: [year]
-VALUATION: [dollar amount, e.g., $1.2B or $500M]
-SOURCE: [exact website URL where you found this information]
-NOTES: [brief context about the valuation - funding round, IPO, etc.]
+{{
+  "company": "{company_name}",
+  "analysis_date": "2024-XX-XX",
+  "valuations": [
+    {{
+      "year": 2021,
+      "valuation": "$36B",
+      "source": "https://techcrunch.com/exact-url",
+      "notes": "Series G funding round led by Sequoia"
+    }},
+    {{
+      "year": 2022,
+      "valuation": "Not found",
+      "source": "N/A",
+      "notes": "No valuation data available for this year"
+    }}
+  ]
+}}
 
----
+Rules for the JSON response:
+1. Include ALL requested years ({years_str}) even if no data is found
+2. Use "Not found" for valuation when no data exists
+3. Use "N/A" for source when no data exists
+4. Provide exact URLs in the source field when data is found
+5. Include brief context in notes (funding round type, IPO, acquisition, etc.)
+6. Ensure the JSON is valid and properly formatted
 
-If you cannot find valuation data for a specific year, write:
-YEAR: [year]
-VALUATION: Not found
-SOURCE: N/A
-NOTES: No valuation data available for this year
-
----
-
-Please search thoroughly and provide the most recent and reliable sources. Focus on official announcements, reputable financial news, and regulatory filings.
+Search thoroughly and provide the most recent and reliable sources. Focus on official announcements, reputable financial news, and regulatory filings.
 """
         return prompt
 
     def parse_valuation_response(self, response_text: str, company_name: str, years: List[int]) -> List[Dict[str, Any]]:
-        """Parse Claude's response to extract valuation data."""
+        """Parse Claude's JSON response to extract valuation data."""
         valuations = []
         
-        # Split response by year sections
-        sections = response_text.split('---')
-        
-        for section in sections:
-            if not section.strip():
-                continue
-                
-            year_match = re.search(r'YEAR:\s*(\d{4})', section)
-            valuation_match = re.search(r'VALUATION:\s*([^\n]+)', section)
-            source_match = re.search(r'SOURCE:\s*([^\n]+)', section)
-            notes_match = re.search(r'NOTES:\s*([^\n]+)', section)
+        try:
+            # Try to parse as JSON first
+            json_response = json.loads(response_text)
             
-            if year_match:
-                year = int(year_match.group(1))
-                valuation = valuation_match.group(1).strip() if valuation_match else 'Not found'
-                source = source_match.group(1).strip() if source_match else 'N/A'
-                notes = notes_match.group(1).strip() if notes_match else ''
-                
+            for valuation_data in json_response.get('valuations', []):
                 valuations.append({
                     'company': company_name,
-                    'year': year,
-                    'valuation': valuation,
-                    'source': source,
-                    'notes': notes
+                    'year': valuation_data.get('year'),
+                    'valuation': valuation_data.get('valuation', 'Not found'),
+                    'source': valuation_data.get('source', 'N/A'),
+                    'notes': valuation_data.get('notes', ''),
+                    'debug_response': response_text
                 })
+                
+        except json.JSONDecodeError:
+            logger.warning(f"Failed to parse JSON response for {company_name}, falling back to regex parsing")
+            
+            # Fallback to regex parsing for non-JSON responses
+            sections = response_text.split('---')
+            
+            for section in sections:
+                if not section.strip():
+                    continue
+                    
+                year_match = re.search(r'YEAR:\s*(\d{4})', section)
+                valuation_match = re.search(r'VALUATION:\s*([^\n]+)', section)
+                source_match = re.search(r'SOURCE:\s*([^\n]+)', section)
+                notes_match = re.search(r'NOTES:\s*([^\n]+)', section)
+                
+                if year_match:
+                    year = int(year_match.group(1))
+                    valuation = valuation_match.group(1).strip() if valuation_match else 'Not found'
+                    source = source_match.group(1).strip() if source_match else 'N/A'
+                    notes = notes_match.group(1).strip() if notes_match else ''
+                    
+                    valuations.append({
+                        'company': company_name,
+                        'year': year,
+                        'valuation': valuation,
+                        'source': source,
+                        'notes': notes,
+                        'debug_response': response_text
+                    })
         
         # Ensure we have entries for all requested years
         found_years = {v['year'] for v in valuations}
@@ -141,7 +171,8 @@ Please search thoroughly and provide the most recent and reliable sources. Focus
                     'year': year,
                     'valuation': 'Not found',
                     'source': 'N/A',
-                    'notes': 'No data available'
+                    'notes': 'No data available',
+                    'debug_response': response_text
                 })
         
         return valuations
@@ -184,7 +215,8 @@ Please search thoroughly and provide the most recent and reliable sources. Focus
                 'year': year,
                 'valuation': 'Error',
                 'source': 'N/A',
-                'notes': f'API Error: {str(e)}'
+                'notes': f'API Error: {str(e)}',
+                'debug_response': f'Error: {str(e)}'
             } for year in years]
 
     async def analyze_all_companies(self, companies: List[Dict[str, Any]], years: List[int]) -> List[Dict[str, Any]]:
@@ -205,7 +237,7 @@ Please search thoroughly and provide the most recent and reliable sources. Focus
     def save_results_csv(self, valuations: List[Dict[str, Any]], output_file: str):
         """Save valuation results to CSV file."""
         try:
-            fieldnames = ['company', 'year', 'valuation', 'source', 'notes']
+            fieldnames = ['company', 'year', 'valuation', 'source', 'notes', 'debug_response']
             
             with open(output_file, 'w', newline='', encoding='utf-8') as f:
                 writer = csv.DictWriter(f, fieldnames=fieldnames)
