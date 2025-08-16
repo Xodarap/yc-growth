@@ -2,6 +2,7 @@
 
 import os
 import json
+import csv
 from dotenv import load_dotenv
 from anthropic import Anthropic
 
@@ -80,9 +81,9 @@ submit_tool = {
 client = Anthropic(api_key=os.getenv('ANTHROPIC_API_KEY'))
 
 message = client.messages.create(
-    model="claude-3-5-sonnet-20241022",
+    model="claude-sonnet-4-20250514",
     max_tokens=4000,
-    temperature=0.1,
+    # temperature=0.1,
     messages=[{
         "role": "user",
         "content": prompt
@@ -120,6 +121,31 @@ if submitted_data:
     print("\n✅ Successfully received structured data via submit tool!")
     print(f"Company: {submitted_data['company']}")
     print(f"Found {len(submitted_data['valuations'])} valuation entries")
+    
+    # Write to CSV
+    csv_filename = "valuation_results.csv"
+    fieldnames = ['company', 'year', 'valuation', 'source', 'notes']
+    
+    with open(csv_filename, 'w', newline='', encoding='utf-8') as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        
+        for val_data in submitted_data['valuations']:
+            writer.writerow({
+                'company': submitted_data['company'],
+                'year': val_data['year'],
+                'valuation': val_data['valuation'],
+                'source': val_data['source'],
+                'notes': val_data['notes']
+            })
+    
+    print(f"📄 Results written to {csv_filename}")
+    
+    # Display the CSV content
+    print(f"\n📊 CSV Contents:")
+    with open(csv_filename, 'r') as f:
+        print(f.read())
+        
 else:
     print("\n❌ No data submitted via submit tool")
 
