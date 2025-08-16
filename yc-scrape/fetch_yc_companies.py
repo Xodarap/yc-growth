@@ -5,7 +5,7 @@ import csv
 from typing import List, Dict, Any
 
 def fetch_yc_companies() -> List[Dict[str, Any]]:
-    """Fetch YC company data from Algolia API"""
+    """Fetch YC company data from Algolia API batch by batch"""
     url = "https://45bwzj1sgc-dsn.algolia.net/1/indexes/*/queries"
     
     headers = {
@@ -27,44 +27,54 @@ def fetch_yc_companies() -> List[Dict[str, Any]]:
         'x-algolia-api-key': 'MjBjYjRiMzY0NzdhZWY0NjExY2NhZjYxMGIxYjc2MTAwNWFkNTkwNTc4NjgxYjU0YzFhYTY2ZGQ5OGY5NDMxZnJlc3RyaWN0SW5kaWNlcz0lNUIlMjJZQ0NvbXBhbnlfcHJvZHVjdGlvbiUyMiUyQyUyMllDQ29tcGFueV9CeV9MYXVuY2hfRGF0ZV9wcm9kdWN0aW9uJTIyJTVEJnRhZ0ZpbHRlcnM9JTVCJTIyeWNkY19wdWJsaWMlMjIlNUQmYW5hbHl0aWNzVGFncz0lNUIlMjJ5Y2RjJTIyJTVE'
     }
     
+    # First get all available batches
+    print("Getting list of all YC batches...")
     data = {
         "requests": [{
             "indexName": "YCCompany_production",
-            "params": "facets=%5B%22app_answers%22%2C%22app_video_public%22%2C%22batch%22%2C%22demo_day_video_public%22%2C%22industries%22%2C%22isHiring%22%2C%22nonprofit%22%2C%22question_answers%22%2C%22regions%22%2C%22subindustry%22%2C%22top_company%22%5D&hitsPerPage=1000&maxValuesPerFacet=1000&page=0&query=&tagFilters="
+            "params": "analytics=false&clickAnalytics=false&facets=batch&hitsPerPage=0&maxValuesPerFacet=1000&page=0&query="
         }]
     }
     
-    all_companies = []
-    page = 0
+    response = requests.post(url, headers=headers, json=data)
+    if response.status_code != 200:
+        print(f"Error getting batches: {response.status_code}")
+        return []
     
-    while True:
-        print(f"Fetching page {page}...")
+    result = response.json()
+    batch_facets = result["results"][0]["facets"]["batch"]
+    batches = list(batch_facets.keys())
+    print(f"Found {len(batches)} YC batches: {batches[:5]}{'...' if len(batches) > 5 else ''}")
+    
+    all_companies = []
+    
+    # Fetch companies for each batch
+    for i, batch in enumerate(batches):
+        print(f"\nFetching batch {i+1}/{len(batches)}: {batch}")
         
-        # Update page number in params
-        data["requests"][0]["params"] = data["requests"][0]["params"].replace(f"page={page-1}", f"page={page}") if page > 0 else data["requests"][0]["params"]
-        if page > 0:
-            data["requests"][0]["params"] = data["requests"][0]["params"].replace("page=0", f"page={page}")
+        # URL encode the batch name for facetFilters
+        import urllib.parse
+        encoded_batch = urllib.parse.quote(f"batch:{batch}")
+        
+        data = {
+            "requests": [{
+                "indexName": "YCCompany_production",
+                "params": f"facetFilters=%5B%5B%22batch%3A{batch}%22%5D%5D&facets=%5B%22app_answers%22%2C%22app_video_public%22%2C%22batch%22%2C%22demo_day_video_public%22%2C%22industries%22%2C%22isHiring%22%2C%22nonprofit%22%2C%22question_answers%22%2C%22regions%22%2C%22subindustry%22%2C%22top_company%22%5D&hitsPerPage=1000&maxValuesPerFacet=1000&page=0&query=&tagFilters="
+            }]
+        }
         
         response = requests.post(url, headers=headers, json=data)
         
         if response.status_code != 200:
-            print(f"Error: {response.status_code} - {response.text}")
-            break
+            print(f"Error fetching batch {batch}: {response.status_code}")
+            continue
             
         result = response.json()
         hits = result["results"][0]["hits"]
         
-        if not hits:
-            break
-            
+        print(f"Retrieved {len(hits)} companies from {batch}")
         all_companies.extend(hits)
-        print(f"Retrieved {len(hits)} companies from page {page}")
-        
-        # Check if we got less than 1000 results (last page)
-        if len(hits) < 1000:
-            break
-            
-        page += 1
+        print(f"Total companies so far: {len(all_companies)}")
     
     print(f"Total companies retrieved: {len(all_companies)}")
     return all_companies
