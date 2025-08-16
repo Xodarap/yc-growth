@@ -22,7 +22,7 @@ try:
     from anthropic import Anthropic
     from dotenv import load_dotenv
 except ImportError:
-    print("Error: Required packages not installed. Run: pip install anthropic python-dotenv")
+    print("Error: Required packages not installed. Run: pip install -r requirements.txt")
     sys.exit(1)
 
 load_dotenv()
@@ -161,7 +161,13 @@ Please search thoroughly and provide the most recent and reliable sources. Focus
                 messages=[{
                     "role": "user",
                     "content": prompt
-                }]
+                }],
+                tools=[{
+            "type": "web_search_20250305",
+            "name": "web_search",
+            "max_uses": 5
+        }]
+
             )
             
             response_text = message.content[0].text

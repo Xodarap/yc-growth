@@ -1,6 +1,31 @@
+# Environment variables
 .env
+
+# Python
 __pycache__/
+*.py[cod]
+*$py.class
 .mypy_cache/
 .claude
+
+# Output files
+*.csv
 *.txt
-*.json
+yc_valuations.csv
+yc_valuation_summary.txt
+test_single_result.csv
+test_single_summary.txt
+
+# Keep sample data but ignore analysis results
+!sample_companies.json
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
