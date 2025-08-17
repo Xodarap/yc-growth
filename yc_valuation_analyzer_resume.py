@@ -83,6 +83,21 @@ class YCValuationAnalyzer:
             )
         ''')
         
+        # Add final_year and end_reason columns if they don't exist (migration)
+        try:
+            cursor.execute('ALTER TABLE companies ADD COLUMN final_year INTEGER')
+            print("   ✅ Added final_year column")
+        except sqlite3.OperationalError:
+            # Column already exists
+            pass
+            
+        try:
+            cursor.execute('ALTER TABLE companies ADD COLUMN end_reason TEXT')
+            print("   ✅ Added end_reason column")
+        except sqlite3.OperationalError:
+            # Column already exists
+            pass
+        
         conn.commit()
         conn.close()
         print(f"📁 Database initialized: {self.db_path}")
@@ -173,6 +188,7 @@ Please search for:
 - Market cap data if publicly traded
 - Private market valuations
 - Exit events (acquisitions, IPOs)
+- Company closure, bankruptcy, or shutdown
 
 Search sources like:
 - TechCrunch, Bloomberg, Reuters, Wall Street Journal
@@ -181,6 +197,8 @@ Search sources like:
 - Crunchbase, PitchBook, AngelList
 - Financial news sites and startup databases
 
+IMPORTANT: If the company was acquired, went bankrupt, shut down, or had any final exit event, indicate the FINAL YEAR of operations/valuation in your response.
+
 When you have gathered the data, use the submit_valuations tool to submit your findings.
 
 For each year, provide:
@@ -188,12 +206,12 @@ For each year, provide:
 - The source URL where you found this information
 - Brief notes about the context (funding round, IPO, acquisition, etc.)
 
-Include ALL years from {company['yc_year']} to {self.current_year}, even if no valuation data exists (use "Not found").
+Include ALL years from {company['yc_year']} to the final year of operations, or to {self.current_year} if still operating.
 
 Focus on Y Combinator companies which often have well-documented funding histories.
 """
     
-    def save_valuations_to_db(self, company_name, valuations):
+    def save_valuations_to_db(self, company_name, valuations, final_year=None, end_reason=None):
         """Save valuations to database immediately."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
@@ -207,12 +225,12 @@ Focus on Y Combinator companies which often have well-documented funding histori
                   val_data['source'], val_data['notes']))
             saved_count += 1
         
-        # Mark company as completed
+        # Mark company as completed with final year info
         cursor.execute('''
             UPDATE companies 
-            SET status = 'completed', processed_at = CURRENT_TIMESTAMP
+            SET status = 'completed', final_year = ?, end_reason = ?, processed_at = CURRENT_TIMESTAMP
             WHERE company = ?
-        ''', (company_name,))
+        ''', (final_year, end_reason, company_name))
         
         conn.commit()
         conn.close()
@@ -225,7 +243,7 @@ Focus on Y Combinator companies which often have well-documented funding histori
         years = self.get_years_to_analyze(company['yc_year'])
         print(f"   Years to analyze: {len(years)} years ({years[0]}-{years[-1]})")
         
-        # Define the submit tool
+        # Define the submit tool with final year capability
         submit_tool = {
             "name": "submit_valuations",
             "description": "Submit the final valuation data for the company",
@@ -233,6 +251,14 @@ Focus on Y Combinator companies which often have well-documented funding histori
                 "type": "object",
                 "properties": {
                     "company": {"type": "string"},
+                    "final_year": {
+                        "type": "integer",
+                        "description": "The last year this company should be tracked (due to acquisition, bankruptcy, etc.). If still operating, use 2025."
+                    },
+                    "end_reason": {
+                        "type": "string", 
+                        "description": "Reason for ending tracking: 'acquired', 'bankrupt', 'shutdown', 'still_operating', etc."
+                    },
                     "valuations": {
                         "type": "array",
                         "items": {
@@ -247,7 +273,7 @@ Focus on Y Combinator companies which often have well-documented funding histori
                         }
                     }
                 },
-                "required": ["company", "valuations"]
+                "required": ["company", "final_year", "end_reason", "valuations"]
             }
         }
         
@@ -272,8 +298,21 @@ Focus on Y Combinator companies which often have well-documented funding histori
                     break
             
             if submitted_data:
-                # Save to database immediately
-                saved_count = self.save_valuations_to_db(company['name'], submitted_data['valuations'])
+                # Save to database immediately with final year info
+                final_year = submitted_data.get('final_year', self.current_year)
+                end_reason = submitted_data.get('end_reason', 'still_operating')
+                
+                saved_count = self.save_valuations_to_db(
+                    company['name'], 
+                    submitted_data['valuations'],
+                    final_year,
+                    end_reason
+                )
+                
+                # Show final year info
+                if final_year < self.current_year:
+                    print(f"   📅 Final year: {final_year} ({end_reason})")
+                
                 print(f"   ✅ Found {len(submitted_data['valuations'])} valuations, saved {saved_count} to database")
                 return saved_count
             else:
@@ -310,15 +349,16 @@ Focus on Y Combinator companies which often have well-documented funding histori
         cursor = conn.cursor()
         
         cursor.execute('''
-            SELECT company, year, valuation, source, notes 
-            FROM valuations 
-            ORDER BY company, year
+            SELECT v.company, v.year, v.valuation, v.source, v.notes, c.final_year, c.end_reason
+            FROM valuations v
+            LEFT JOIN companies c ON v.company = c.company
+            ORDER BY v.company, v.year
         ''')
         
         rows = cursor.fetchall()
         
         with open(csv_filename, 'w', newline='', encoding='utf-8') as f:
-            fieldnames = ['company', 'year', 'valuation', 'source', 'notes']
+            fieldnames = ['company', 'year', 'valuation', 'source', 'notes', 'final_year', 'end_reason']
             writer = csv.DictWriter(f, fieldnames=fieldnames)
             writer.writeheader()
             
@@ -328,7 +368,9 @@ Focus on Y Combinator companies which often have well-documented funding histori
                     'year': row[1], 
                     'valuation': row[2],
                     'source': row[3],
-                    'notes': row[4]
+                    'notes': row[4],
+                    'final_year': row[5],
+                    'end_reason': row[6]
                 })
         
         conn.close()
@@ -349,6 +391,10 @@ Focus on Y Combinator companies which often have well-documented funding histori
         cursor.execute('SELECT COUNT(*) FROM companies')
         total_companies = cursor.fetchone()[0]
         
+        # Show breakdown of end reasons
+        cursor.execute('SELECT end_reason, COUNT(*) FROM companies WHERE status = "completed" GROUP BY end_reason')
+        end_reasons = dict(cursor.fetchall())
+        
         conn.close()
         
         completed = status_counts.get('completed', 0)
@@ -360,6 +406,9 @@ Focus on Y Combinator companies which often have well-documented funding histori
         print(f"   Companies pending: {pending}")
         print(f"   Companies failed/error: {failed}")
         print(f"   Total valuations saved: {total_valuations}")
+        
+        if end_reasons:
+            print(f"   End reasons: {dict(end_reasons)}")
         
         return pending > 0  # Return True if there are pending companies
     
@@ -451,8 +500,8 @@ async def main():
     
     analyzer = YCValuationAnalyzer()
     
-    # Resume analysis (will automatically skip completed companies)
-    await analyzer.resume_analysis('yc-scrape/yc_companies.csv')
+    # Test with a company that was likely acquired (to test final year functionality)
+    await analyzer.analyze_single_company_test('Kiko')
 
 if __name__ == "__main__":
     asyncio.run(main())
