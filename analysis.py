@@ -60,13 +60,13 @@ def parse_valuation(valuation_str):
     
     # Extract numeric value and multiplier
     # Look for patterns like $1.2B, $50M, $120K, etc.
-    match = re.search(r'\$?([0-9.,]+)\s*([kmb])?', val_str)
+    match = re.search(r'\$(\d+(,\d+)?(\.\d+)?)(-\d+)?([kmb])?', val_str)
     if not match:
         return None
     
     try:
         number = float(match.group(1).replace(',', ''))
-        multiplier = match.group(2)
+        multiplier = match.group(5)
         
         if multiplier == 'k':
             return number * 1_000
