@@ -60,7 +60,7 @@ def parse_valuation(valuation_str):
     
     # Extract numeric value and multiplier
     # Look for patterns like $1.2B, $50M, $120K, etc.
-    match = re.search(r'\$(\d+(,\d+)?(\.\d+)?)(-\d+)?([kmb])?', val_str, re.IGNORECASE)
+    match = re.search(r'\$(\d+(,\d+)?(\.\d+)?)(-\d+)?(([kmb])|(\s+[mb]illion))?', val_str, re.IGNORECASE)
     if not match:
         return None
     
@@ -70,9 +70,9 @@ def parse_valuation(valuation_str):
         
         if multiplier == 'k':
             return number * 1_000
-        elif multiplier == 'm':
+        elif multiplier == 'm' or multiplier == ' million':
             return number * 1_000_000
-        elif multiplier == 'b':
+        elif multiplier == 'b' or multiplier == ' billion':
             return number * 1_000_000_000
         else:
             return number
@@ -80,7 +80,7 @@ def parse_valuation(valuation_str):
         return None
 
 # Test the parsing function
-test_values = ['$1.2B', '$50M', '$120K', 'Not found', 'Acquired for $2B', '$95,000', '$595-600M post-money valuation']
+test_values = ['$1.2B', '$50M', '$120K', 'Not found', 'Acquired for $2B', '$95,000', '$595-600M post-money valuation', '$8.2 Million']
 for val in test_values:
     print(f"{val} -> {parse_valuation(val)}")
 # %%
@@ -131,7 +131,7 @@ print(f"📊 Found two-year valuations for {len(two_year_df)} companies")
 print(f"📈 YC years covered: {two_year_df['yc_year'].min()} - {two_year_df['yc_year'].max()}")
 
 # Show sample data
-display(two_year_df[two_year_df['yc_year'] == 2013].head(10))
+display(two_year_df[two_year_df['yc_year'] == 2005].head(10))
 
 # %%
 import matplotlib.pyplot as plt
