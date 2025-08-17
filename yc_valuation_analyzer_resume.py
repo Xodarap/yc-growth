@@ -281,7 +281,7 @@ Focus on Y Combinator companies which often have well-documented funding histori
             prompt = self.create_valuation_prompt(company, years)
             
             message = self.client.messages.create(
-                model="claude-sonnet-4-20250514",
+                model="claude-3-5-haiku-latest",
                 max_tokens=6000,
                 messages=[{"role": "user", "content": prompt}],
                 tools=[
