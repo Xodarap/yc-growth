@@ -148,7 +148,10 @@ class YCValuationAnalyzer:
             SELECT company, batch, yc_year, website 
             FROM companies 
             WHERE status = 'pending'
-            ORDER BY yc_year, company
+            ORDER BY 
+                CASE WHEN yc_year = 2023 THEN 0 ELSE 1 END,
+                yc_year, 
+                company
         ''')
         
         rows = cursor.fetchall()
