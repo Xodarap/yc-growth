@@ -54,13 +54,13 @@ def parse_valuation(valuation_str):
     val_str = valuation_str.lower().strip()
     
     # Skip non-numeric valuations
-    skip_phrases = ['not found', 'not disclosed', 'no public', 'undisclosed', 'acquired', 'public company']
+    skip_phrases = ['not found', 'not disclosed', 'no public', 'undisclosed']
     if any(phrase in val_str for phrase in skip_phrases):
         return None
     
     # Extract numeric value and multiplier
     # Look for patterns like $1.2B, $50M, $120K, etc.
-    match = re.search(r'\$(\d+(,\d+)?(\.\d+)?)(-\d+)?([kmb])?', val_str)
+    match = re.search(r'\$(\d+(,\d+)?(\.\d+)?)(-\d+)?([kmb])?', val_str, re.IGNORECASE)
     if not match:
         return None
     
