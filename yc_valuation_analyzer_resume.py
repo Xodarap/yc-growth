@@ -500,8 +500,8 @@ async def main():
     
     analyzer = YCValuationAnalyzer()
     
-    # Test with a company that was likely acquired (to test final year functionality)
-    await analyzer.analyze_single_company_test('Kiko')
+    # Resume analysis (will automatically skip completed companies)
+    await analyzer.resume_analysis('yc-scrape/yc_companies.csv')
 
 if __name__ == "__main__":
     asyncio.run(main())
