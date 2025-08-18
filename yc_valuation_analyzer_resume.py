@@ -239,12 +239,22 @@ Focus on Y Combinator companies which often have well-documented funding histori
         conn.close()
         return saved_count
     
+    def _mark_company_status(self, company_name, status):
+        """Helper method to mark company status in database."""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        cursor.execute('''
+            UPDATE companies 
+            SET status = ?, processed_at = CURRENT_TIMESTAMP
+            WHERE company = ?
+        ''', (status, company_name))
+        conn.commit()
+        conn.close()
+    
     async def analyze_company(self, company):
         """Analyze a single company and save results to database immediately."""
-        print(f"\n🔍 Analyzing {company['name']} ({company['batch']})...")
-        
+        # Reduced verbosity for concurrent processing
         years = self.get_years_to_analyze(company['yc_year'])
-        print(f"   Years to analyze: {len(years)} years ({years[0]}-{years[-1]})")
         
         # Define the submit tool with final year capability
         submit_tool = {
@@ -283,14 +293,18 @@ Focus on Y Combinator companies which often have well-documented funding histori
         try:
             prompt = self.create_valuation_prompt(company, years)
             
-            message = self.client.messages.create(
-                model="claude-3-5-haiku-latest",
-                max_tokens=6000,
-                messages=[{"role": "user", "content": prompt}],
-                tools=[
-                    {"type": "web_search_20250305", "name": "web_search", "max_uses": 10},
-                    submit_tool
-                ]
+            # Run the API call in a thread to avoid blocking other concurrent operations
+            message = await asyncio.get_event_loop().run_in_executor(
+                None,
+                lambda: self.client.messages.create(
+                    model="claude-3-5-haiku-latest",
+                    max_tokens=6000,
+                    messages=[{"role": "user", "content": prompt}],
+                    tools=[
+                        {"type": "web_search_20250305", "name": "web_search", "max_uses": 10},
+                        submit_tool
+                    ]
+                )
             )
             
             # Find the submitted data
@@ -305,45 +319,37 @@ Focus on Y Combinator companies which often have well-documented funding histori
                 final_year = submitted_data.get('final_year', self.current_year)
                 end_reason = submitted_data.get('end_reason', 'still_operating')
                 
-                saved_count = self.save_valuations_to_db(
-                    company['name'], 
-                    submitted_data['valuations'],
-                    final_year,
-                    end_reason
+                # Run database operations in thread to avoid blocking
+                saved_count = await asyncio.get_event_loop().run_in_executor(
+                    None,
+                    lambda: self.save_valuations_to_db(
+                        company['name'], 
+                        submitted_data['valuations'],
+                        final_year,
+                        end_reason
+                    )
                 )
                 
-                # Show final year info
-                if final_year < self.current_year:
-                    print(f"   📅 Final year: {final_year} ({end_reason})")
-                
-                print(f"   ✅ Found {len(submitted_data['valuations'])} valuations, saved {saved_count} to database")
+                # Show concise result for concurrent processing
+                final_info = f" (final: {final_year})" if final_year < self.current_year else ""
+                print(f"   ✅ {company['name']}: {len(submitted_data['valuations'])} valuations{final_info}")
                 return saved_count
             else:
                 print(f"   ❌ No data submitted for {company['name']}")
-                # Mark as failed in database
-                conn = sqlite3.connect(self.db_path)
-                cursor = conn.cursor()
-                cursor.execute('''
-                    UPDATE companies 
-                    SET status = 'failed', processed_at = CURRENT_TIMESTAMP
-                    WHERE company = ?
-                ''', (company['name'],))
-                conn.commit()
-                conn.close()
+                # Mark as failed in database (async)
+                await asyncio.get_event_loop().run_in_executor(
+                    None,
+                    lambda: self._mark_company_status(company['name'], 'failed')
+                )
                 return 0
                 
         except Exception as e:
             print(f"   ❌ Error analyzing {company['name']}: {str(e)}")
-            # Mark as error in database
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.cursor()
-            cursor.execute('''
-                UPDATE companies 
-                SET status = 'error', processed_at = CURRENT_TIMESTAMP
-                WHERE company = ?
-            ''', (company['name'],))
-            conn.commit()
-            conn.close()
+            # Mark as error in database (async)
+            await asyncio.get_event_loop().run_in_executor(
+                None,
+                lambda: self._mark_company_status(company['name'], 'error')
+            )
             return 0
     
     def export_to_csv(self, csv_filename='yc_valuations_export.csv'):
@@ -468,25 +474,48 @@ Focus on Y Combinator companies which often have well-documented funding histori
         self.show_progress()
         
         total_valuations = 0
+        batch_size = 5
         
-        for i, company in enumerate(pending_companies, 1):
-            print(f"\n📈 Processing {i}/{len(pending_companies)}: {company['name']}")
+        # Process companies in batches of 5
+        for batch_start in range(0, len(pending_companies), batch_size):
+            batch_end = min(batch_start + batch_size, len(pending_companies))
+            batch = pending_companies[batch_start:batch_end]
             
-            valuations_found = await self.analyze_company(company)
-            total_valuations += valuations_found
+            batch_num = batch_start//batch_size + 1
+            print(f"\n🚀 Processing batch {batch_num} ({batch_start + 1}-{batch_end}/{len(pending_companies)})")
+            for company in batch:
+                print(f"   📈 {company['name']}")
             
-            # Show progress after each company
+            print(f"   ⚡ Starting concurrent analysis of {len(batch)} companies...")
+            
+            # Process all companies in this batch concurrently
+            tasks = [self.analyze_company(company) for company in batch]
+            batch_results = await asyncio.gather(*tasks, return_exceptions=True)
+            
+            print(f"   ✅ Batch {batch_num} completed!")
+            
+            # Count successful results
+            batch_valuations = 0
+            for i, result in enumerate(batch_results):
+                if isinstance(result, Exception):
+                    print(f"   ❌ Error processing {batch[i]['name']}: {result}")
+                else:
+                    batch_valuations += result
+            
+            total_valuations += batch_valuations
+            
+            # Show progress after each batch
             has_pending = self.show_progress()
             
-            # Export progress periodically (every 10 companies)
-            if i % 10 == 0:
-                exported_count = self.export_to_csv(f'yc_valuations_progress_{i}.csv')
+            # Export progress periodically (every 2 batches = 10 companies)
+            if (batch_end) % 10 == 0:
+                exported_count = self.export_to_csv(f'yc_valuations_progress_{batch_end}.csv')
                 print(f"   📄 Progress export: {exported_count} records")
             
-            # Rate limiting
-            if i < len(pending_companies):
-                print("   ⏳ Waiting 3 seconds...")
-                await asyncio.sleep(3)
+            # Rate limiting between batches (less aggressive since we're doing more work per batch)
+            if batch_end < len(pending_companies):
+                print("   ⏳ Waiting 5 seconds between batches...")
+                await asyncio.sleep(5)
         
         print(f"\n🎉 Analysis complete!")
         print(f"   Companies processed: {len(pending_companies)}")
