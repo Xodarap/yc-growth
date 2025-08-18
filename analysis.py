@@ -17,6 +17,12 @@ plt.style.use('default')
 sns.set_palette("husl")
 plt.rcParams['figure.figsize'] = (12, 8)
 
+# Configure pandas display options to show full content
+pd.set_option('display.max_columns', None)
+pd.set_option('display.max_colwidth', None)
+pd.set_option('display.width', None)
+pd.set_option('display.max_rows', 100)
+
 print("📊 Libraries loaded successfully")
 
 # Connect to the SQLite database and load data
@@ -81,6 +87,22 @@ def parse_valuation(valuation_str):
     except:
         return None
 
+def format_valuation(value):
+    """
+    Format numeric valuation to human-readable format like $1.5B, $50M, $120K
+    """
+    if pd.isna(value) or value == 0:
+        return "$0"
+    
+    if value >= 1e9:
+        return f"${value/1e9:.1f}B"
+    elif value >= 1e6:
+        return f"${value/1e6:.1f}M"
+    elif value >= 1e3:
+        return f"${value/1e3:.0f}K"
+    else:
+        return f"${value:,.0f}"
+
 # Test the parsing function
 test_values = ['$1.2B', '$50M', '$120K', 'Not found', 'Acquired for $2B', '$95,000', '$595-600M post-money valuation', '$8.2 Million']
 for val in test_values:
@@ -136,7 +158,7 @@ print(f"📊 Found two-year valuations for {len(two_year_df)} companies")
 print(f"📈 YC years covered: {two_year_df['yc_year'].min()} - {two_year_df['yc_year'].max()}")
 
 # Show sample data
-display(two_year_df[two_year_df['yc_year'] == 2005].head(10))
+print(two_year_df[two_year_df['yc_year'] == 2005].head(10))
 
 # %%
 import matplotlib.pyplot as plt
@@ -160,7 +182,9 @@ plt.show()
 # %%
 # Show companies with the biggest 2-year growth (by absolute valuation)
 top_growth = two_year_df.sort_values('two_year_valuation_real', ascending=False).head(20)
+# Add human-readable valuation column
+top_growth['valuation_formatted'] = top_growth['two_year_valuation_real'].apply(format_valuation)
 print("🚀 Companies with the biggest 2-year growth:")
-display(top_growth[['company', 'batch', 'two_year_valuation_real', 'source']])
+display(top_growth[['company', 'batch', 'valuation_formatted', 'source']])
 
 # %%
