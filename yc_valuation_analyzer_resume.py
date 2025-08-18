@@ -148,10 +148,10 @@ class YCValuationAnalyzer:
             SELECT company, batch, yc_year, website 
             FROM companies 
             WHERE status = 'pending'
+            --and yc_year < 2025
             ORDER BY 
-                CASE WHEN yc_year = 2023 THEN 0 ELSE 1 END,
-                yc_year, 
-                company
+                -- CASE WHEN yc_year = 2024 THEN 0 ELSE 1 END,
+                random()
         ''')
         
         rows = cursor.fetchall()
@@ -205,13 +205,11 @@ IMPORTANT: If the company was acquired, went bankrupt, shut down, or had any fin
 When you have gathered the data, use the submit_valuations tool to submit your findings.
 
 For each year, provide:
-- The valuation amount (e.g., "$95B", "$50M", "Acquired for $2B") 
+- The valuation amount (e.g., "$95B", "$50M", "Acquired for $2B"). Be sure that the valuation is a monetary figure, and that it is the company's value (and not, e.g. its revenue). 
 - The source URL where you found this information
 - Brief notes about the context (funding round, IPO, acquisition, etc.)
 
 Include ALL years from {company['yc_year']} to the final year of operations, or to {self.current_year} if still operating.
-
-Focus on Y Combinator companies which often have well-documented funding histories.
 """
     
     def save_valuations_to_db(self, company_name, valuations, final_year=None, end_reason=None):

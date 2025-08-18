@@ -6,7 +6,9 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import sqlite3
 import re
-from datetime import datetime
+import cpi
+#cpi.update()
+from datetime import date
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -89,6 +91,7 @@ valuations_df['valuation_numeric'] = valuations_df['valuation'].apply(parse_valu
 
 # Filter to only numeric valuations
 numeric_valuations = valuations_df[valuations_df['valuation_numeric'].notna()].copy()
+inflators = {year: cpi.inflate(1, date(year, 6, 1), to=date(2025, 6, 1)) for year in numeric_valuations['year'].unique()}
 
 # Calculate two-year post-founding valuations
 def get_two_year_valuation(company_data):
@@ -112,6 +115,7 @@ def get_two_year_valuation(company_data):
             'target_year': target_year,
             'actual_year': closest_year,
             'two_year_valuation': valuation_row['valuation_numeric'],
+            'two_year_valuation_real': valuation_row['valuation_numeric'] * inflators[closest_year],
             'batch': valuation_row['batch'],
             'end_reason': valuation_row['end_reason']
         }
@@ -139,7 +143,7 @@ import matplotlib.pyplot as plt
 # Compute average two-year valuation per batch
 # Sort batches by their corresponding year (yc_year)
 batch_years = two_year_df.groupby('batch')['yc_year'].min()
-avg_2yr_valuation = two_year_df.groupby('batch')['two_year_valuation'].mean()
+avg_2yr_valuation = two_year_df.groupby('batch')['two_year_valuation_real'].mean()
 avg_2yr_valuation = avg_2yr_valuation.loc[batch_years.sort_values().index]
 
 plt.figure(figsize=(12, 6))
@@ -154,8 +158,8 @@ plt.show()
 
 # %%
 # Show companies with the biggest 2-year growth (by absolute valuation)
-top_growth = two_year_df.sort_values('two_year_valuation', ascending=False).head(20)
+top_growth = two_year_df.sort_values('two_year_valuation_real', ascending=False).head(20)
 print("🚀 Companies with the biggest 2-year growth:")
-display(top_growth[['company', 'yc_year', 'batch', 'two_year_valuation', 'end_reason']])
+display(top_growth[['company', 'yc_year', 'batch', 'two_year_valuation_real', 'end_reason']])
 
 # %%
