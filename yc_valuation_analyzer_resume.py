@@ -511,11 +511,7 @@ Focus on Y Combinator companies which often have well-documented funding histori
             if (batch_end) % 10 == 0:
                 exported_count = self.export_to_csv(f'yc_valuations_progress_{batch_end}.csv')
                 print(f"   📄 Progress export: {exported_count} records")
-            
-            # Rate limiting between batches (less aggressive since we're doing more work per batch)
-            if batch_end < len(pending_companies):
-                print("   ⏳ Waiting 5 seconds between batches...")
-                await asyncio.sleep(5)
+           
         
         print(f"\n🎉 Analysis complete!")
         print(f"   Companies processed: {len(pending_companies)}")
