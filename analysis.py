@@ -257,3 +257,67 @@ print("🚀 Companies with the biggest 1-year growth:")
 display(top_growth_1yr[['company', 'batch', 'valuation_formatted', 'source']])
 
 # %%
+# Analysis: Recent companies (2023+) representation in top growth vs base rate
+print("\n🔍 RECENT COMPANY REPRESENTATION ANALYSIS (YC 2023+)")
+print("=" * 70)
+
+# Calculate base rates
+total_companies_2yr = len(two_year_df)
+recent_companies_2yr = len(two_year_df[two_year_df['yc_year'] >= 2023])
+base_rate_2yr = (recent_companies_2yr / total_companies_2yr) * 100
+
+total_companies_1yr = len(one_year_df)
+recent_companies_1yr = len(one_year_df[one_year_df['yc_year'] >= 2023])
+base_rate_1yr = (recent_companies_1yr / total_companies_1yr) * 100
+
+print(f"📊 BASE RATES:")
+print(f"   2-Year Dataset: {recent_companies_2yr}/{total_companies_2yr} companies are from 2023+ ({base_rate_2yr:.1f}%)")
+print(f"   1-Year Dataset: {recent_companies_1yr}/{total_companies_1yr} companies are from 2023+ ({base_rate_1yr:.1f}%)")
+
+# Calculate representation in top growth lists
+top_2yr_recent = len(top_growth[top_growth['yc_year'] >= 2023])
+top_2yr_total = len(top_growth)
+top_2yr_rate = (top_2yr_recent / top_2yr_total) * 100
+
+top_1yr_recent = len(top_growth_1yr[top_growth_1yr['yc_year'] >= 2023])
+top_1yr_total = len(top_growth_1yr)
+top_1yr_rate = (top_1yr_recent / top_1yr_total) * 100
+
+print(f"\n🏆 TOP GROWTH REPRESENTATION:")
+print(f"   Top 20 2-Year Growth: {top_2yr_recent}/{top_2yr_total} companies are from 2023+ ({top_2yr_rate:.1f}%)")
+print(f"   Top 20 1-Year Growth: {top_1yr_recent}/{top_1yr_total} companies are from 2023+ ({top_1yr_rate:.1f}%)")
+
+# Calculate over/under representation
+ratio_2yr = top_2yr_rate / base_rate_2yr if base_rate_2yr > 0 else 0
+ratio_1yr = top_1yr_rate / base_rate_1yr if base_rate_1yr > 0 else 0
+
+print(f"\n📈 OVER/UNDER REPRESENTATION:")
+print(f"   2-Year Growth: {ratio_2yr:.1f}x the base rate")
+print(f"   1-Year Growth: {ratio_1yr:.1f}x the base rate")
+
+if ratio_2yr > 1.5:
+    print(f"   🔥 2023+ companies are OVER-REPRESENTED in top 2-year growth!")
+elif ratio_2yr < 0.5:
+    print(f"   ❄️  2023+ companies are UNDER-REPRESENTED in top 2-year growth")
+else:
+    print(f"   ⚖️  2023+ companies are proportionally represented in top 2-year growth")
+
+if ratio_1yr > 1.5:
+    print(f"   🔥 2023+ companies are OVER-REPRESENTED in top 1-year growth!")
+elif ratio_1yr < 0.5:
+    print(f"   ❄️  2023+ companies are UNDER-REPRESENTED in top 1-year growth")
+else:
+    print(f"   ⚖️  2023+ companies are proportionally represented in top 1-year growth")
+
+# Show which recent companies made the top lists
+if top_2yr_recent > 0:
+    print(f"\n🌟 RECENT COMPANIES IN TOP 2-YEAR GROWTH:")
+    recent_2yr_companies = top_growth[top_growth['yc_year'] >= 2023][['company', 'batch', 'valuation_formatted']]
+    display(recent_2yr_companies)
+
+if top_1yr_recent > 0:
+    print(f"\n🌟 RECENT COMPANIES IN TOP 1-YEAR GROWTH:")
+    recent_1yr_companies = top_growth_1yr[top_growth_1yr['yc_year'] >= 2023][['company', 'batch', 'valuation_formatted']]
+    display(recent_1yr_companies)
+
+# %%
