@@ -147,7 +147,7 @@ class YCValuationAnalyzer:
         cursor.execute('''
             SELECT company, batch, yc_year, website 
             FROM companies 
-            WHERE status = 'pending'
+            WHERE status = 'error' or status = 'pending'
             --and yc_year < 2025
             ORDER BY 
                 -- CASE WHEN yc_year = 2024 THEN 0 ELSE 1 END,
