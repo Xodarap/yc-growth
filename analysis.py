@@ -144,6 +144,35 @@ def get_two_year_valuation(company_data):
         }
     return None
 
+# Calculate one-year post-founding valuations
+def get_one_year_valuation(company_data):
+    """
+    Get the valuation closest to 1 year after the YC batch year.
+    """
+    company_data = company_data.sort_values('year')
+    yc_year = company_data['yc_year'].iloc[0]
+    target_year = yc_year + 1
+    
+    # Find the closest year to target_year that has a valuation
+    available_years = company_data['year'].values
+    closest_year = min(available_years, key=lambda x: abs(x - target_year))
+    
+    # Only consider it valid if within 1 year of target
+    if abs(closest_year - target_year) <= 1:
+        valuation_row = company_data[company_data['year'] == closest_year].iloc[0]
+        return {
+            'company': valuation_row['company'],
+            'yc_year': yc_year,
+            'target_year': target_year,
+            'actual_year': closest_year,
+            'one_year_valuation': valuation_row['valuation_numeric'],
+            'one_year_valuation_real': valuation_row['valuation_numeric'] * inflators[closest_year],
+            'batch': valuation_row['batch'],
+            'end_reason': valuation_row['end_reason'],
+            'source': valuation_row['source']
+        }
+    return None
+
 # Get two-year valuations for each company
 two_year_valuations = []
 for company in numeric_valuations['company'].unique():
@@ -157,8 +186,24 @@ two_year_df = pd.DataFrame(two_year_valuations)
 print(f"📊 Found two-year valuations for {len(two_year_df)} companies")
 print(f"📈 YC years covered: {two_year_df['yc_year'].min()} - {two_year_df['yc_year'].max()}")
 
+# Get one-year valuations for each company
+one_year_valuations = []
+for company in numeric_valuations['company'].unique():
+    company_data = numeric_valuations[numeric_valuations['company'] == company]
+    one_year_val = get_one_year_valuation(company_data)
+    if one_year_val:
+        one_year_valuations.append(one_year_val)
+
+one_year_df = pd.DataFrame(one_year_valuations)
+
+print(f"📊 Found one-year valuations for {len(one_year_df)} companies")
+print(f"📈 YC years covered: {one_year_df['yc_year'].min()} - {one_year_df['yc_year'].max()}")
+
 # Show sample data
+print("Two-year data sample:")
 print(two_year_df[two_year_df['yc_year'] == 2005].head(10))
+print("\nOne-year data sample:")
+print(one_year_df[one_year_df['yc_year'] == 2005].head(10))
 
 # %%
 import matplotlib.pyplot as plt
@@ -180,11 +225,35 @@ plt.tight_layout()
 plt.show()
 
 # %%
+# Compute average one-year valuation per batch
+batch_years_1yr = one_year_df.groupby('batch')['yc_year'].min()
+avg_1yr_valuation = one_year_df.groupby('batch')['one_year_valuation_real'].mean()
+avg_1yr_valuation = avg_1yr_valuation.loc[batch_years_1yr.sort_values().index]
+
+plt.figure(figsize=(12, 6))
+avg_1yr_valuation.plot(kind='bar')
+plt.ylabel('Average 1-Year Valuation (numeric)')
+plt.xlabel('YC Batch')
+plt.title('Average 1-Year Lag Valuation by YC Batch')
+plt.xticks(rotation=45, ha='right')
+plt.yscale('log')
+plt.tight_layout()
+plt.show()
+
+# %%
 # Show companies with the biggest 2-year growth (by absolute valuation)
 top_growth = two_year_df.sort_values('two_year_valuation_real', ascending=False).head(20)
 # Add human-readable valuation column
 top_growth['valuation_formatted'] = top_growth['two_year_valuation_real'].apply(format_valuation)
 print("🚀 Companies with the biggest 2-year growth:")
 display(top_growth[['company', 'batch', 'valuation_formatted', 'source']])
+
+# %%
+# Show companies with the biggest 1-year growth (by absolute valuation)
+top_growth_1yr = one_year_df.sort_values('one_year_valuation_real', ascending=False).head(20)
+# Add human-readable valuation column
+top_growth_1yr['valuation_formatted'] = top_growth_1yr['one_year_valuation_real'].apply(format_valuation)
+print("🚀 Companies with the biggest 1-year growth:")
+display(top_growth_1yr[['company', 'batch', 'valuation_formatted', 'source']])
 
 # %%
