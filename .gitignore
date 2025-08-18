@@ -10,7 +10,6 @@ __pycache__/
 
 # Output files
 *.csv
-*.txt
 yc_valuations.csv
 yc_valuation_summary.txt
 test_single_result.csv
@@ -29,3 +28,5 @@ test_single_summary.txt
 # OS
 .DS_Store
 Thumbs.db
+
+logs/

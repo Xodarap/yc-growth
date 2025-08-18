@@ -1,0 +1,9 @@
+anthropic>=0.7.0
+asyncio-throttle>=1.0.2
+python-dotenv>=1.0.0
+cpi
+sqlite3
+seaborn
+matplotlib
+numpy
+pandas
