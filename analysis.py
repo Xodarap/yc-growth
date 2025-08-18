@@ -309,6 +309,75 @@ elif ratio_1yr < 0.5:
 else:
     print(f"   ⚖️  2023+ companies are proportionally represented in top 1-year growth")
 
+# Calculate average growth rates for pre vs post 2023 companies
+print(f"\n💰 AVERAGE VALUATIONS COMPARISON:")
+
+# 2-year average valuations
+pre_2023_2yr = two_year_df[two_year_df['yc_year'] < 2023]['two_year_valuation_real']
+post_2023_2yr = two_year_df[two_year_df['yc_year'] >= 2023]['two_year_valuation_real']
+
+avg_pre_2023_2yr = pre_2023_2yr.mean()
+median_pre_2023_2yr = pre_2023_2yr.median()
+avg_post_2023_2yr = post_2023_2yr.mean()
+median_post_2023_2yr = post_2023_2yr.median()
+
+print(f"   📊 2-YEAR VALUATIONS:")
+print(f"      Pre-2023 (n={len(pre_2023_2yr)}):")
+print(f"         Average: {format_valuation(avg_pre_2023_2yr)}")
+print(f"         Median:  {format_valuation(median_pre_2023_2yr)}")
+print(f"      Post-2023 (n={len(post_2023_2yr)}):")
+print(f"         Average: {format_valuation(avg_post_2023_2yr)}")
+print(f"         Median:  {format_valuation(median_post_2023_2yr)}")
+
+# Calculate ratios
+avg_ratio_2yr = avg_post_2023_2yr / avg_pre_2023_2yr if avg_pre_2023_2yr > 0 else 0
+median_ratio_2yr = median_post_2023_2yr / median_pre_2023_2yr if median_pre_2023_2yr > 0 else 0
+
+print(f"      📈 2023+ vs Pre-2023 Ratios:")
+print(f"         Average: {avg_ratio_2yr:.1f}x")
+print(f"         Median:  {median_ratio_2yr:.1f}x")
+
+# 1-year average valuations
+pre_2023_1yr = one_year_df[one_year_df['yc_year'] < 2023]['one_year_valuation_real']
+post_2023_1yr = one_year_df[one_year_df['yc_year'] >= 2023]['one_year_valuation_real']
+
+avg_pre_2023_1yr = pre_2023_1yr.mean()
+median_pre_2023_1yr = pre_2023_1yr.median()
+avg_post_2023_1yr = post_2023_1yr.mean()
+median_post_2023_1yr = post_2023_1yr.median()
+
+print(f"\n   📊 1-YEAR VALUATIONS:")
+print(f"      Pre-2023 (n={len(pre_2023_1yr)}):")
+print(f"         Average: {format_valuation(avg_pre_2023_1yr)}")
+print(f"         Median:  {format_valuation(median_pre_2023_1yr)}")
+print(f"      Post-2023 (n={len(post_2023_1yr)}):")
+print(f"         Average: {format_valuation(avg_post_2023_1yr)}")
+print(f"         Median:  {format_valuation(median_post_2023_1yr)}")
+
+# Calculate ratios
+avg_ratio_1yr = avg_post_2023_1yr / avg_pre_2023_1yr if avg_pre_2023_1yr > 0 else 0
+median_ratio_1yr = median_post_2023_1yr / median_pre_2023_1yr if median_pre_2023_1yr > 0 else 0
+
+print(f"      📈 2023+ vs Pre-2023 Ratios:")
+print(f"         Average: {avg_ratio_1yr:.1f}x")
+print(f"         Median:  {median_ratio_1yr:.1f}x")
+
+# Summary insights
+print(f"\n🎯 KEY INSIGHTS:")
+if avg_ratio_2yr > 1.2:
+    print(f"   🚀 2023+ companies have {avg_ratio_2yr:.1f}x higher average 2-year valuations!")
+elif avg_ratio_2yr < 0.8:
+    print(f"   📉 2023+ companies have {avg_ratio_2yr:.1f}x lower average 2-year valuations")
+else:
+    print(f"   ⚖️  2023+ companies have similar average 2-year valuations ({avg_ratio_2yr:.1f}x)")
+
+if avg_ratio_1yr > 1.2:
+    print(f"   🚀 2023+ companies have {avg_ratio_1yr:.1f}x higher average 1-year valuations!")
+elif avg_ratio_1yr < 0.8:
+    print(f"   📉 2023+ companies have {avg_ratio_1yr:.1f}x lower average 1-year valuations")
+else:
+    print(f"   ⚖️  2023+ companies have similar average 1-year valuations ({avg_ratio_1yr:.1f}x)")
+
 # Show which recent companies made the top lists
 if top_2yr_recent > 0:
     print(f"\n🌟 RECENT COMPANIES IN TOP 2-YEAR GROWTH:")
