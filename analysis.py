@@ -153,3 +153,9 @@ plt.tight_layout()
 plt.show()
 
 # %%
+# Show companies with the biggest 2-year growth (by absolute valuation)
+top_growth = two_year_df.sort_values('two_year_valuation', ascending=False).head(20)
+print("🚀 Companies with the biggest 2-year growth:")
+display(top_growth[['company', 'yc_year', 'batch', 'two_year_valuation', 'end_reason']])
+
+# %%
