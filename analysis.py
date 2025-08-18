@@ -117,7 +117,8 @@ def get_two_year_valuation(company_data):
             'two_year_valuation': valuation_row['valuation_numeric'],
             'two_year_valuation_real': valuation_row['valuation_numeric'] * inflators[closest_year],
             'batch': valuation_row['batch'],
-            'end_reason': valuation_row['end_reason']
+            'end_reason': valuation_row['end_reason'],
+            'source': valuation_row['source']
         }
     return None
 
@@ -160,6 +161,6 @@ plt.show()
 # Show companies with the biggest 2-year growth (by absolute valuation)
 top_growth = two_year_df.sort_values('two_year_valuation_real', ascending=False).head(20)
 print("🚀 Companies with the biggest 2-year growth:")
-display(top_growth[['company', 'yc_year', 'batch', 'two_year_valuation_real', 'end_reason']])
+display(top_growth[['company', 'batch', 'two_year_valuation_real', 'source']])
 
 # %%
