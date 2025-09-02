@@ -33,6 +33,7 @@ companies_df = pd.read_sql_query("""
     SELECT company, batch, yc_year, status, final_year, end_reason
     FROM companies
     WHERE status = 'completed'
+        and yc_year < 2025
 """, conn)
 
 # Load valuations data with company info
@@ -42,6 +43,7 @@ valuations_df = pd.read_sql_query("""
     FROM valuations v
     JOIN companies c ON v.company = c.company
     WHERE c.status = 'completed'
+        and c.yc_year < 2025
     ORDER BY c.yc_year, v.company, v.year
 """, conn)
 
@@ -216,6 +218,13 @@ avg_2yr_valuation = avg_2yr_valuation.loc[batch_years.sort_values().index]
 
 plt.figure(figsize=(12, 6))
 avg_2yr_valuation.plot(kind='bar')
+# Add a vertical line after Winter 2022 batch to indicate post-ChatGPT era
+# Find the index of 'W22' (Winter 2022) in the sorted batch list
+if 'Winter 2022' in avg_2yr_valuation.index:
+    w22_idx = list(avg_2yr_valuation.index).index('Winter 2022')
+    plt.axvline(x=w22_idx - 0.5, color='blue', linestyle='--', linewidth=2)
+    plt.text(w22_idx + 0.1, plt.ylim()[1]*0.1, 'ChatGPT Launch', color='blue', rotation=90, va='bottom', ha='left', fontsize=12)
+
 plt.ylabel('Average 2-Year Valuation (numeric)')
 plt.xlabel('YC Batch')
 plt.title('Average 2-Year Lag Valuation by YC Batch')
@@ -228,10 +237,27 @@ plt.show()
 # Compute average one-year valuation per batch
 batch_years_1yr = one_year_df.groupby('batch')['yc_year'].min()
 avg_1yr_valuation = one_year_df.groupby('batch')['one_year_valuation_real'].mean()
-avg_1yr_valuation = avg_1yr_valuation.loc[batch_years_1yr.sort_values().index]
+def _batch_sort_key(batch: str) -> tuple[int, int]:
+    # Assumes batch is in format "Winter 2023", "Summer 2022", etc.
+    season_order = {'winter': 0, 'summer': 1, 'fall': 2}
+    parts = batch.lower().split()
+    if len(parts) != 2 or parts[0] not in season_order:
+        raise ValueError(f"Unexpected batch format: {batch}")
+    season, year = parts
+    return (int(year), season_order[season])
+
+sorted_batches = sorted(batch_years_1yr.index, key=_batch_sort_key)
+avg_1yr_valuation = avg_1yr_valuation.loc[sorted_batches]
 
 plt.figure(figsize=(12, 6))
 avg_1yr_valuation.plot(kind='bar')
+
+# Add a vertical line after Winter 2022 batch to indicate post-ChatGPT era
+# Find the index of 'W22' (Winter 2022) in the sorted batch list
+if 'Winter 2023' in avg_1yr_valuation.index:
+    w22_idx = list(avg_1yr_valuation.index).index('Winter 2023')
+    plt.axvline(x=w22_idx - 0.5, color='blue', linestyle='--', linewidth=2)
+    plt.text(w22_idx + 0.1, plt.ylim()[1]*0.1, 'ChatGPT Launch', color='blue', rotation=90, va='bottom', ha='left', fontsize=12)
 plt.ylabel('Average 1-Year Valuation (numeric)')
 plt.xlabel('YC Batch')
 plt.title('Average 1-Year Lag Valuation by YC Batch')
@@ -388,5 +414,3 @@ if top_1yr_recent > 0:
     print(f"\n🌟 RECENT COMPANIES IN TOP 1-YEAR GROWTH:")
     recent_1yr_companies = top_growth_1yr[top_growth_1yr['yc_year'] >= 2023][['company', 'batch', 'valuation_formatted']]
     display(recent_1yr_companies)
-
-# %%
