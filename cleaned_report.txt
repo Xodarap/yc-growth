@@ -1,0 +1,307 @@
+cleaning=ON  rows dropped from re-run: {'synthetic estimates': 138, 'verified fabrications': 11}
+
+
+################################################################################################
+# 1-YEAR WINDOW: ORIGINAL (target year +/- 1)
+################################################################################################
+
+================================================================================================
+2-YEAR POST-YC VALUATION
+================================================================================================
+run              baseline Aug-2025 re-run Sep-2026
+n                             1278            1335
+2023+ in top 20               1/20            5/20
+base rate                    16.3%           19.4%
+lift                         0.31x           1.29x
+mean pre-2023               $46.5M          $48.2M
+mean 2023+                  $13.3M          $85.8M
+mean ratio                   0.29x           1.78x
+median pre-2023              $5.0M           $5.1M
+median 2023+                 $5.0M           $5.2M
+geomean pre-2023             $4.8M           $4.9M
+geomean 2023+                $4.1M           $7.3M
+>=$1B pre-2023               0.75%           0.74%
+>=$1B 2023+                  0.00%           1.54%
+MWU p                        0.648           0.136
+log-t p                      0.253         0.00224
+
+-- baseline Aug-2025: top 25 (2-yr) --
+   1  Deel                       Winter 2019      $6.5B   $5.5B
+   2  Zenefits                   Winter 2013      $6.1B   $4.5B
+   3  Whatnot                    Winter 2020      $4.0B   $3.7B
+   4  Jeeves                     Summer 2020      $2.3B   $2.1B
+   5  Airbnb                     Winter 2009      $1.9B   $1.3B
+   6  Prometheus                 Winter 2019      $1.8B   $1.5B
+   7  Airbyte                    Winter 2020      $1.6B   $1.5B
+   8  Yassir                     Winter 2020      $1.1B   $1B
+   9  AtoB                       Summer 2020    $870.9M   $800M
+  10  QuickNode                  Winter 2021    $845.8M   $800M
+  11  DoorDash                   Summer 2013    $804.2M   $595-600M post-money valuation
+  12  Cruise                     Winter 2014    $669.2M   $500M-$1B
+  13  Vouch                      Summer 2019    $653.0M   $550M
+  14  Newfront                   Winter 2018    $625.6M   $500M
+  15* Tennr                      Winter 2023    $605.0M   $605M
+  16  Ginkgo Bioworks            Summer 2014    $602.2M   $450M
+  17  Flexport                   Winter 2014    $488.5M   $365M
+  18  Instacart                  Summer 2012    $479.1M   $354M
+  19  Postscript                 Winter 2019    $474.9M   $400M
+  20  Observe.AI                 Winter 2018    $380.4M   $304M
+  21  Groww                      Winter 2018    $375.4M   $300M
+  22  Khatabook                  Summer 2018    $344.1M   $275M-$300M
+  23  Porter                     Summer 2020    $326.6M   $300M
+  24  Heroku                     Winter 2008    $313.7M   $212M
+  25  Aspora                     Winter 2022    $308.0M   $300M
+
+-- re-run Sep-2026: top 25 (2-yr) --
+   1  Deel                       Winter 2019      $6.8B   $5.5B
+   2  Zenefits                   Winter 2013      $6.3B   $4.5B
+   3* Legora                     Winter 2024      $5.6B   $5.6B
+   4  Whatnot                    Winter 2020      $4.2B   $3.7B
+   5* Corgi Insurance            Summer 2024      $4.0B   $4 Billion
+   6  Jeeves                     Summer 2020      $2.4B   $2.1B
+   7* Starcloud                  Summer 2024      $2.3B   $2.3B
+   8  Airbnb                     Winter 2009      $1.9B   $1.3B
+   9  Prometheus                 Winter 2019      $1.8B   $1.5B
+  10  Airbyte                    Winter 2020      $1.7B   $1.5B
+  11* Emergent                   Summer 2024      $1.5B   $1.5B
+  12  Yassir                     Winter 2020      $1.1B   $1B
+  13  AtoB                       Summer 2020    $901.6M   $800M
+  14  QuickNode                  Winter 2021    $875.6M   $800M
+  15  DoorDash                   Summer 2013    $832.6M   $595-600M post-money valuation
+  16  Vendr                      Summer 2019    $737.5M   $600M
+  17  Cruise                     Winter 2014    $692.8M   $500M-$1B
+  18  Vouch                      Summer 2019    $676.0M   $550M
+  19  Newfront                   Winter 2018    $647.7M   $500M
+  20* Tennr                      Winter 2023    $626.4M   $605M
+  21  Ginkgo Bioworks            Summer 2014    $623.5M   $450M
+  22* Reducto                    Winter 2024    $600.0M   $600M
+  23* Blacksmith                 Winter 2024    $550.0M   $550M
+  24* HappyRobot                 Summer 2023    $517.7M   $500M
+  25  Flexport                   Winter 2014    $505.7M   $365M
+
+================================================================================================
+1-YEAR POST-YC VALUATION
+================================================================================================
+run              baseline Aug-2025 re-run Sep-2026
+n                             2895            3173
+2023+ in top 20               1/20            7/20
+base rate                    27.9%           33.8%
+lift                         0.18x           1.04x
+mean pre-2023               $13.2M          $13.9M
+mean 2023+                   $7.9M          $17.9M
+mean ratio                   0.60x           1.29x
+median pre-2023              $2.5M           $2.6M
+median 2023+                 $2.6M           $2.1M
+geomean pre-2023             $1.9M           $2.0M
+geomean 2023+                $2.4M           $2.4M
+>=$1B pre-2023               0.10%           0.10%
+>=$1B 2023+                  0.00%           0.28%
+MWU p                      0.00314          0.0621
+log-t p                   0.000945         0.00244
+
+-- baseline Aug-2025: top 25 (1-yr) --
+   1  Whatnot                    Winter 2020      $1.8B   $1.5B
+   2  Airbyte                    Winter 2020      $1.8B   $1.5B
+   3  AtoB                       Summer 2020    $870.9M   $800M
+   4  Teespring                  Winter 2013    $832.3M   $615M
+   5  Zenefits                   Winter 2013    $676.7M   $500M
+   6* Legora (formerly Leya)     Winter 2024    $675.0M   $675M
+   7  Cruise                     Winter 2014    $669.2M   $500M-$1B
+   8  Newfront                   Winter 2018    $625.6M   $500M
+   9  Jeeves                     Summer 2020    $593.6M   $500M
+  10  PostHog                    Winter 2020    $534.2M   $450M
+  11  Postscript                 Winter 2019    $474.9M   $400M
+  12  Observe.AI                 Winter 2018    $380.4M   $304M
+  13  Khatabook                  Summer 2018    $346.3M   $275M-$300M
+  14  Heroku                     Winter 2008    $313.7M   $212M
+  15  SFA Therapeutics           Summer 2021    $272.1M   $250M
+  16  QuickNode                  Winter 2021    $272.1M   $250M
+  17  Ginkgo Bioworks            Summer 2014    $270.3M   $200M
+  18  Vouch                      Summer 2019    $264.5M   $210M
+  19  Tractian                   Winter 2021    $223.2M   $205M
+  20  Moonshot Brands            Winter 2021    $195.9M   $180M
+  21  Arc                        Winter 2022    $190.3M   $180M
+  22  ZeroDown                   Winter 2019    $187.7M   $150M
+  23* Greptile                   Winter 2024    $180.0M   $180M
+  24  Mythia                     Winter 2021    $179.6M   $165M
+  25  Porter                     Summer 2020    $178.1M   $150M
+
+-- re-run Sep-2026: top 25 (1-yr) --
+   1* Corgi Insurance            Summer 2024      $4.0B   $4 Billion
+   2* AfterQuery                 Winter 2025      $3.2B   $3.2B
+   3* Legora                     Winter 2024      $1.9B   $1.8B
+   4  Whatnot                    Winter 2020      $1.8B   $1.5B
+   5  Airbyte                    Winter 2020      $1.8B   $1.5B
+   6  AtoB                       Summer 2020    $901.6M   $800M
+   7  Teespring                  Winter 2013    $861.7M   $615M
+   8  Vendr                      Summer 2019    $737.5M   $600M
+   9  Zenefits                   Winter 2013    $700.6M   $500M
+  10  Cruise                     Winter 2014    $692.8M   $500M-$1B
+  11  Newfront                   Winter 2018    $647.7M   $500M
+  12* Reducto                    Winter 2024    $621.2M   $600M
+  13  Jeeves                     Summer 2020    $614.6M   $500M
+  14  PostHog                    Winter 2020    $553.1M   $450M
+  15* David AI                   Summer 2024    $517.7M   $500M
+  16  Postscript                 Winter 2019    $491.7M   $400M
+  17  Observe.AI                 Winter 2018    $393.8M   $304M
+  18* Salient                    Winter 2023    $362.4M   $350 million
+  19  Khatabook                  Summer 2018    $358.5M   $275M-$300M
+  20* Giga                       Summer 2023    $356.0M   $343.82M
+  21  Heroku                     Winter 2008    $324.8M   $212M
+  22* Delve                      Winter 2024    $310.6M   $300M
+  23  QuickNode                  Winter 2021    $281.8M   $250M
+  24  SFA Therapeutics           Summer 2021    $281.8M   $250M
+  25  Ginkgo Bioworks            Summer 2014    $279.9M   $200M
+
+
+################################################################################################
+# 1-YEAR WINDOW: STRICT (target year only, consistent with the 2-year rule)
+################################################################################################
+
+================================================================================================
+2-YEAR POST-YC VALUATION
+================================================================================================
+run              baseline Aug-2025 re-run Sep-2026
+n                             1278            1335
+2023+ in top 20               1/20            5/20
+base rate                    16.3%           19.4%
+lift                         0.31x           1.29x
+mean pre-2023               $46.5M          $48.2M
+mean 2023+                  $13.3M          $85.8M
+mean ratio                   0.29x           1.78x
+median pre-2023              $5.0M           $5.1M
+median 2023+                 $5.0M           $5.2M
+geomean pre-2023             $4.8M           $4.9M
+geomean 2023+                $4.1M           $7.3M
+>=$1B pre-2023               0.75%           0.74%
+>=$1B 2023+                  0.00%           1.54%
+MWU p                        0.648           0.136
+log-t p                      0.253         0.00224
+
+-- baseline Aug-2025: top 25 (2-yr) --
+   1  Deel                       Winter 2019      $6.5B   $5.5B
+   2  Zenefits                   Winter 2013      $6.1B   $4.5B
+   3  Whatnot                    Winter 2020      $4.0B   $3.7B
+   4  Jeeves                     Summer 2020      $2.3B   $2.1B
+   5  Airbnb                     Winter 2009      $1.9B   $1.3B
+   6  Prometheus                 Winter 2019      $1.8B   $1.5B
+   7  Airbyte                    Winter 2020      $1.6B   $1.5B
+   8  Yassir                     Winter 2020      $1.1B   $1B
+   9  AtoB                       Summer 2020    $870.9M   $800M
+  10  QuickNode                  Winter 2021    $845.8M   $800M
+  11  DoorDash                   Summer 2013    $804.2M   $595-600M post-money valuation
+  12  Cruise                     Winter 2014    $669.2M   $500M-$1B
+  13  Vouch                      Summer 2019    $653.0M   $550M
+  14  Newfront                   Winter 2018    $625.6M   $500M
+  15* Tennr                      Winter 2023    $605.0M   $605M
+  16  Ginkgo Bioworks            Summer 2014    $602.2M   $450M
+  17  Flexport                   Winter 2014    $488.5M   $365M
+  18  Instacart                  Summer 2012    $479.1M   $354M
+  19  Postscript                 Winter 2019    $474.9M   $400M
+  20  Observe.AI                 Winter 2018    $380.4M   $304M
+  21  Groww                      Winter 2018    $375.4M   $300M
+  22  Khatabook                  Summer 2018    $344.1M   $275M-$300M
+  23  Porter                     Summer 2020    $326.6M   $300M
+  24  Heroku                     Winter 2008    $313.7M   $212M
+  25  Aspora                     Winter 2022    $308.0M   $300M
+
+-- re-run Sep-2026: top 25 (2-yr) --
+   1  Deel                       Winter 2019      $6.8B   $5.5B
+   2  Zenefits                   Winter 2013      $6.3B   $4.5B
+   3* Legora                     Winter 2024      $5.6B   $5.6B
+   4  Whatnot                    Winter 2020      $4.2B   $3.7B
+   5* Corgi Insurance            Summer 2024      $4.0B   $4 Billion
+   6  Jeeves                     Summer 2020      $2.4B   $2.1B
+   7* Starcloud                  Summer 2024      $2.3B   $2.3B
+   8  Airbnb                     Winter 2009      $1.9B   $1.3B
+   9  Prometheus                 Winter 2019      $1.8B   $1.5B
+  10  Airbyte                    Winter 2020      $1.7B   $1.5B
+  11* Emergent                   Summer 2024      $1.5B   $1.5B
+  12  Yassir                     Winter 2020      $1.1B   $1B
+  13  AtoB                       Summer 2020    $901.6M   $800M
+  14  QuickNode                  Winter 2021    $875.6M   $800M
+  15  DoorDash                   Summer 2013    $832.6M   $595-600M post-money valuation
+  16  Vendr                      Summer 2019    $737.5M   $600M
+  17  Cruise                     Winter 2014    $692.8M   $500M-$1B
+  18  Vouch                      Summer 2019    $676.0M   $550M
+  19  Newfront                   Winter 2018    $647.7M   $500M
+  20* Tennr                      Winter 2023    $626.4M   $605M
+  21  Ginkgo Bioworks            Summer 2014    $623.5M   $450M
+  22* Reducto                    Winter 2024    $600.0M   $600M
+  23* Blacksmith                 Winter 2024    $550.0M   $550M
+  24* HappyRobot                 Summer 2023    $517.7M   $500M
+  25  Flexport                   Winter 2014    $505.7M   $365M
+
+================================================================================================
+1-YEAR POST-YC VALUATION
+================================================================================================
+run              baseline Aug-2025 re-run Sep-2026
+n                             1614            1535
+2023+ in top 20               2/20            7/20
+base rate                    32.3%           28.6%
+lift                         0.31x           1.22x
+mean pre-2023               $17.5M          $18.0M
+mean 2023+                  $10.8M          $27.0M
+mean ratio                   0.62x           1.50x
+median pre-2023              $3.7M           $3.8M
+median 2023+                 $5.1M           $3.6M
+geomean pre-2023             $3.3M           $3.4M
+geomean 2023+                $3.9M           $4.6M
+>=$1B pre-2023               0.18%           0.18%
+>=$1B 2023+                  0.00%           0.46%
+MWU p                       0.0155           0.105
+log-t p                     0.0567         0.00125
+
+-- baseline Aug-2025: top 25 (1-yr) --
+   1  Airbyte                    Winter 2020      $1.8B   $1.5B
+   2  Whatnot                    Winter 2020      $1.8B   $1.5B
+   3  Teespring                  Winter 2013    $832.3M   $615M
+   4  Zenefits                   Winter 2013    $676.7M   $500M
+   5* Legora (formerly Leya)     Winter 2024    $675.0M   $675M
+   6  Jeeves                     Summer 2020    $593.6M   $500M
+   7  PostHog                    Winter 2020    $534.2M   $450M
+   8  Khatabook                  Summer 2018    $346.3M   $275M-$300M
+   9  QuickNode                  Winter 2021    $272.1M   $250M
+  10  SFA Therapeutics           Summer 2021    $272.1M   $250M
+  11  Ginkgo Bioworks            Summer 2014    $270.3M   $200M
+  12  Tractian                   Winter 2021    $223.2M   $205M
+  13  Moonshot Brands            Winter 2021    $195.9M   $180M
+  14  Arc                        Winter 2022    $190.3M   $180M
+  15  ZeroDown                   Winter 2019    $187.7M   $150M
+  16* Greptile                   Winter 2024    $180.0M   $180M
+  17  Mythia                     Winter 2021    $179.6M   $165M
+  18  Porter                     Summer 2020    $178.1M   $150M
+  19  Ontop                      Winter 2021    $163.3M   $150M
+  20  Aspora                     Winter 2022    $158.6M   $150M
+  21  PingPong                   Winter 2021    $135.0M   $124M total funding
+  22  ElectroNeek                Winter 2020    $124.7M   $105M
+  23  Fondeadora                 Winter 2020    $118.7M   $100M
+  24  Moxion Power Co.           Winter 2021    $108.9M   $100M
+  25  TAG                        Summer 2021    $108.9M   $100M
+
+-- re-run Sep-2026: top 25 (1-yr) --
+   1* AfterQuery                 Winter 2025      $3.2B   $3.2B
+   2* Legora                     Winter 2024      $1.9B   $1.8B
+   3  Airbyte                    Winter 2020      $1.8B   $1.5B
+   4  Whatnot                    Winter 2020      $1.8B   $1.5B
+   5  Teespring                  Winter 2013    $861.7M   $615M
+   6  Zenefits                   Winter 2013    $700.6M   $500M
+   7* Reducto                    Winter 2024    $621.2M   $600M
+   8  Jeeves                     Summer 2020    $614.6M   $500M
+   9  PostHog                    Winter 2020    $553.1M   $450M
+  10* David AI                   Summer 2024    $517.7M   $500M
+  11  Khatabook                  Summer 2018    $358.5M   $275M-$300M
+  12* Delve                      Winter 2024    $310.6M   $300M
+  13  SFA Therapeutics           Summer 2021    $281.8M   $250M
+  14  QuickNode                  Winter 2021    $281.8M   $250M
+  15  Ginkgo Bioworks            Summer 2014    $279.9M   $200M
+  16  Tractian                   Winter 2021    $231.0M   $205M
+  17* Tennr                      Winter 2023    $212.6M   $200-250M
+  18  Moonshot Brands            Winter 2021    $202.9M   $180M
+  19* Wafer                      Summer 2025    $200.0M   $200M+
+  20  ZeroDown                   Winter 2019    $194.3M   $150M
+  21* Greptile                   Winter 2024    $186.4M   $180M
+  22  Mythia                     Winter 2021    $186.0M   $165M
+  23  Porter                     Summer 2020    $184.4M   $150M
+  24  Ontop                      Winter 2021    $169.1M   $150M
+  25  Aspora                     Winter 2022    $164.2M   $150M
