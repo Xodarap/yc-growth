@@ -30,3 +30,6 @@ test_single_summary.txt
 Thumbs.db
 
 logs/
+# Local venv / run logs
+.venv/
+collect_2026.log
