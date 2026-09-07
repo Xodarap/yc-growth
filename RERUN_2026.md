@@ -88,6 +88,37 @@ batch year in the series, including the 2020-2021 ZIRP peak (8.9% / 4.8%).*
 
 ![mean valuation by batch year](rerun_mean_by_year.png)
 
+### The same view without any old data
+
+Both charts above mix collection vintages: pre-2023 batches carry their Aug-2025
+numbers while 2023+ batches were re-collected. This one uses *only* rows written
+by the Sep-2026 pass, so one model on one day produced every number in it.
+
+![single collection vintage](rerun_single_vintage_2026.png)
+
+| batch year | 1-year mark | 2-year mark |
+|---|---|---|
+| 2023 | 3/104 (2.9%) | 10/128 (7.8%) |
+| 2024 | 10/186 (5.4%) | 18/131 (13.7%) |
+| 2025 | 8/149 (5.4%) | not yet observable |
+
+Each successive post-ChatGPT cohort clears $100M more often at the same age:
+2.9% → 5.4% at the 1-year mark, 7.8% → 13.7% at the 2-year mark. Because this
+chart contains no Aug-2025 rows, that gradient cannot be an artefact of the
+model change or of the extra year of reporting.
+
+Two things it cannot show, both consequences of the same restriction:
+
+- **No pre-ChatGPT comparison group.** Only 46 pre-2023 companies were
+  re-collected (1-12 per batch year), and they are precisely the ones the
+  original pass failed on — a selected sample. No pre-2023 series is drawn
+  rather than draw a misleading one.
+- **The 2026 batches are excluded**, though they do have a year-zero figure. It
+  is not trustworthy: 8 of the 10 companies it puts above $100M are the same
+  fabrication pattern documented below — including a "$1.5B Series C" for a
+  Winter 2026 company that has in fact
+  [raised a $500K pre-seed](https://www.vcbacked.co/company/overdrive-health).
+
 ## What actually changed: the companies
 
 Every 2023+ company in either top 20 was verified by hand against the web
@@ -256,7 +287,7 @@ counterfactual, so "GenAI caused it" is not identified. Specific to this re-run:
 | `yc-scrape/fetch_yc_companies_2026.py` | directory scrape; pulls a live Algolia key (the key hardcoded in the original now 403s). 6,203 companies across 50 batches, up from 5,311 |
 | `yc_valuation_analyzer_2026.py` | collector: `claude-haiku-4-5`, current year 2026, concurrency + 429 backoff, per-call usage logged to an `api_usage` table |
 | `analysis_2026.py` | the original notebook as a parameterised script (db, inflation target, cutoff) + significance tests |
-| `plots_2026.py` | the three figures in this document |
+| `plots_2026.py` | the four figures in this document |
 | `clean_and_report.py` | cleaning layer and the side-by-side comparison; `--raw` disables cleaning |
 | `vintage_check.py` | paired old-vs-new comparison helper |
 | `yc_valuations_2026.db` | re-collection. Original `yc_valuations.db` is untouched |

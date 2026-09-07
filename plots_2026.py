@@ -7,6 +7,7 @@ strict-window rules as clean_and_report.py:
   rerun_count_100m_2yr.png  count of companies >=$100M at the 2-year mark
   rerun_share_100m.png      the same as a share of the batch year, both marks
   rerun_mean_by_year.png    mean valuation by batch year, both marks
+  rerun_single_vintage_2026.png  the same, using only rows collected today
 
 Counts and shares answer different questions and disagree: YC batch sizes grew
 ~30x over the period, so a count folds cohort growth into the outcome, while a
@@ -148,6 +149,112 @@ def mean_chart(mo, mn, path, min_n=20):
     plt.close(fig)
 
 
+def single_vintage_chart(path, min_n=50):
+    """Same view, but built only from rows the Sep-2026 pass collected.
+
+    The charts above mix vintages: pre-2023 batches carry their Aug-2025
+    numbers, 2023+ batches were re-collected. This one drops every pre-existing
+    row, so one model on one day produced every number in it.
+
+    Two things it therefore cannot show. There is no pre-ChatGPT baseline: only
+    46 pre-2023 companies were re-collected (1-12 per batch year, and they are
+    precisely the ones the first pass failed on), so no pre-2023 series is
+    drawn. And the 2026 batches are excluded even though they have a year-zero
+    figure, because that figure is not trustworthy -- 8 of the 10 companies it
+    puts above $100M are the fabrication pattern documented in FABRICATED, e.g.
+    a "$1.5B Series C" for a Winter 2026 company that has actually raised a
+    $500K pre-seed. What remains is the post-ChatGPT era measured against
+    itself, at the two marks the original analysis uses.
+    """
+    fresh, _ = load(
+        "yc_valuations_2026.db",
+        2027,
+        date(2026, 6, 1),
+        since="2026-09-06",
+        year_max=2026,
+    )
+    m = marks(fresh, date(2026, 6, 1), True, True)
+
+    lags = (1, 2)
+    years = [2023, 2024, 2025]
+    tables = {lag: hit_table(m, lag) for lag in lags}
+    colours = {1: "#dfa06b", 2: "#c44e52"}
+
+    fig, axes = plt.subplots(1, 2, figsize=(13, 5.6))
+    w = 0.32
+    for ax, mode in zip(axes, ("count", "share")):
+        for i, lag in enumerate(lags):
+            t = tables[lag]
+            xs, vals, labels = [], [], []
+            for j, y in enumerate(years):
+                if y not in t.index or t.n.get(y, 0) < min_n:
+                    # A batch year that cannot have reached this mark yet must
+                    # not be drawn as a zero.
+                    ax.bar([j + (i - 0.5) * w], [0], w, color="none",
+                           edgecolor="#bbb", hatch="///", lw=0.8)
+                    ax.annotate(
+                        f"{lag}-year mark\nnot yet observable",
+                        xy=(j + (i - 0.5) * w, 0),
+                        xytext=(0, 14),
+                        textcoords="offset points",
+                        ha="center",
+                        fontsize=7.5,
+                        color="#888",
+                    )
+                    continue
+                xs.append(j + (i - 0.5) * w)
+                n, h = int(t.n[y]), int(t.h[y])
+                vals.append(h if mode == "count" else h / n * 100)
+                labels.append(f"{h}" if mode == "count" else f"{h / n * 100:.1f}%")
+            bars = ax.bar(
+                xs,
+                vals,
+                w,
+                color=colours[lag],
+                label=f"{lag} year{'s' if lag > 1 else ''} after the batch",
+            )
+            for r, lab in zip(bars, labels):
+                ax.text(
+                    r.get_x() + r.get_width() / 2,
+                    r.get_height() + max(vals) * 0.02,
+                    lab,
+                    ha="center",
+                    fontsize=8,
+                )
+        ax.set_xticks(range(len(years)))
+        ax.set_xticklabels(
+            [
+                f"{y}\n(n={int(tables[1].n.get(y, 0))} at 1yr"
+                f"{f', {int(tables[2].n[y])} at 2yr' if y in tables[2].index else ''})"
+                for y in years
+            ]
+        )
+        ax.set_xlabel("YC batch year")
+        ax.set_ylabel(
+            "companies valued $\\geq$100M"
+            if mode == "count"
+            else "% of the batch year valued $\\geq$100M"
+        )
+        ax.set_title(
+            f"{'Number' if mode == 'count' else 'Share'} worth $\\geq$100M, "
+            f"by years since the batch"
+        )
+        ax.legend(fontsize=8.5)
+        ax.grid(axis="y", alpha=0.3)
+        ax.set_axisbelow(True)
+    fig.suptitle(
+        "Post-ChatGPT batches, single collection vintage: every number here was "
+        "collected on 2026-09-06/07\nNo Aug-2025 rows, and therefore no pre-ChatGPT "
+        "comparison group -- only 46 pre-2023 companies were re-collected",
+        y=0.99,
+        fontsize=10,
+    )
+    fig.tight_layout()
+    fig.savefig(path, dpi=140)
+    plt.close(fig)
+    return tables, years
+
+
 if __name__ == "__main__":
     to25, to26 = date(2025, 6, 1), date(2026, 6, 1)
     old, _ = load("yc_valuations.db", 2025, to25)
@@ -165,4 +272,24 @@ if __name__ == "__main__":
         f"\ntotal >=$100M at the 2-year mark: pre-2023 {sum(q for y, q in zip(years, bv) if y < 2023)}, "
         f"2023+ {sum(q for y, q in zip(years, bv) if y >= 2023)}"
     )
-    print("wrote rerun_count_100m_2yr.png rerun_share_100m.png rerun_mean_by_year.png")
+    tables, sv_years = single_vintage_chart("rerun_single_vintage_2026.png")
+    print("\nsingle collection vintage (rows collected 2026-09-06/07 only):")
+    print(f"{'batch':<7}" + "".join(f"{f'{l}-yr mark':>22}" for l in (1, 2)))
+    for y in sv_years:
+        cells = []
+        for l in (1, 2):
+            t = tables[l]
+            if y in t.index and t.n[y] >= 50:
+                cells.append(
+                    f"{int(t.h[y])}/{int(t.n[y])} ({t.h[y] / t.n[y] * 100:.1f}%)".rjust(
+                        22
+                    )
+                )
+            else:
+                cells.append("not yet observable".rjust(22))
+        print(f"{y:<7}" + "".join(cells))
+
+    print(
+        "\nwrote rerun_count_100m_2yr.png rerun_share_100m.png rerun_mean_by_year.png "
+        "rerun_single_vintage_2026.png"
+    )
