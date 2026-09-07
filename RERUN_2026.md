@@ -64,6 +64,21 @@ is in [Effect of cleaning](#effect-of-cleaning).
 | Mann-Whitney U, p | 0.0155 | 0.105 |
 | Welch t on log₁₀, p | 0.0567 | 0.00125 |
 
+### Companies reaching $100M two years out
+
+![count of companies worth $100M at the 2-year mark](rerun_count_100m_2yr.png)
+
+The 2023 batches went from **1 company** at $100M+ two years out to **10**, and
+the 2024 batches from **0 to 18** — the latter more than any batch year in YC's
+history, on a smaller sample than 2021 (131 vs 292 companies with a 2-year
+figure). Pre-2023 bars are near-identical between the two collections because
+those batches were not re-collected; the single-company differences at 2011,
+2019 and 2022 come from the 113 companies the original pass never completed.
+
+Counts fold cohort growth into the outcome — YC batch sizes grew roughly 30×
+over this period — so the same data as a *rate* is the fairer comparison, and it
+tells the same story:
+
 ![top-tail outcome rate by batch year](rerun_share_100m.png)
 
 *Pre-2023 batch-years were not re-collected, so the two lines coincide there by
@@ -241,6 +256,7 @@ counterfactual, so "GenAI caused it" is not identified. Specific to this re-run:
 | `yc-scrape/fetch_yc_companies_2026.py` | directory scrape; pulls a live Algolia key (the key hardcoded in the original now 403s). 6,203 companies across 50 batches, up from 5,311 |
 | `yc_valuation_analyzer_2026.py` | collector: `claude-haiku-4-5`, current year 2026, concurrency + 429 backoff, per-call usage logged to an `api_usage` table |
 | `analysis_2026.py` | the original notebook as a parameterised script (db, inflation target, cutoff) + significance tests |
+| `plots_2026.py` | the three figures in this document |
 | `clean_and_report.py` | cleaning layer and the side-by-side comparison; `--raw` disables cleaning |
 | `vintage_check.py` | paired old-vs-new comparison helper |
 | `yc_valuations_2026.db` | re-collection. Original `yc_valuations.db` is untouched |
