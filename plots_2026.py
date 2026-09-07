@@ -7,7 +7,10 @@ strict-window rules as clean_and_report.py:
   rerun_count_100m_2yr.png  count of companies >=$100M at the 2-year mark
   rerun_share_100m.png      the same as a share of the batch year, both marks
   rerun_mean_by_year.png    mean valuation by batch year, both marks
-  rerun_single_vintage_2026.png  the same, using only rows collected today
+  rerun_only_*.png          the same three, but only the current dataset --
+                            one series per batch year, no comparison line
+  rerun_single_vintage_2026.png  post-ChatGPT batches from rows physically
+                            re-fetched today (no pre-2023 baseline exists there)
 
 Counts and shares answer different questions and disagree: YC batch sizes grew
 ~30x over the period, so a count folds cohort growth into the outcome, while a
@@ -39,17 +42,27 @@ def hit_table(frames, lag):
     )
 
 
-def count_chart(mo, mn, path, lag=2, min_year=2010):
-    a, b = hit_table(mo, lag), hit_table(mn, lag)
-    years = [y for y in sorted(set(a.index) | set(b.index)) if y >= min_year]
-    av = [int(a.h.get(y, 0)) for y in years]
-    bv = [int(b.h.get(y, 0)) for y in years]
-    den = [int(b.n.get(y, a.n.get(y, 0))) for y in years]
+def count_chart(series, path, lag=2, min_year=2010):
+    """Count of companies >=$100M at the `lag`-year mark, by batch year.
+
+    `series` is [(label, marks_dict, colour), ...]. Pass one entry for a single
+    line of data, two to compare collections side by side.
+    """
+    tables = [(label, hit_table(frames, lag), col) for label, frames, col in series]
+    years = [y for y in sorted(set().union(*(t.index for _, t, _ in tables)))
+             if y >= min_year]
+    # the denominator comes from the last series, which is the newest
+    den = [next((int(t.n[y]) for _, t, _ in reversed(tables) if y in t.index), 0)
+           for y in years]
 
     fig, ax = plt.subplots(figsize=(13, 6))
-    x, w = np.arange(len(years)), 0.4
-    bars = list(ax.bar(x - w / 2, av, w, label=OLD_LABEL, color=OLD_C))
-    bars += list(ax.bar(x + w / 2, bv, w, label=NEW_LABEL, color=NEW_C))
+    x = np.arange(len(years))
+    w = 0.4 if len(tables) > 1 else 0.55
+    bars = []
+    for i, (label, t, col) in enumerate(tables):
+        off = (i - (len(tables) - 1) / 2) * w
+        bars += list(ax.bar(x + off, [int(t.h.get(y, 0)) for y in years], w,
+                            label=label, color=col))
     for r in bars:
         if r.get_height():
             ax.text(
@@ -75,23 +88,26 @@ def count_chart(mo, mn, path, lag=2, min_year=2010):
         f"YC batch year  (n = companies in that batch year with a {lag}-year valuation)"
     )
     ax.set_ylabel(f"companies valued $\\geq$100M at their {lag}-year mark")
+    solo = tables[0][0] if len(tables) == 1 else None
     ax.set_title(
         f"Number of YC companies worth $\\geq$100M {'two' if lag == 2 else 'one'} "
         f"year{'s' if lag == 2 else ''} after their batch"
+        + (f"\n{solo} dataset" if solo else "")
     )
-    ax.legend()
+    if len(tables) > 1:
+        ax.legend()
     ax.grid(axis="y", alpha=0.3)
     ax.set_axisbelow(True)
     fig.tight_layout()
     fig.savefig(path, dpi=140)
     plt.close(fig)
-    return years, av, bv, den
+    return years, [[int(t.h.get(y, 0)) for y in years] for _, t, _ in tables], den
 
 
-def share_chart(mo, mn, path, min_n=20):
+def share_chart(series, path, min_n=20):
     fig, axes = plt.subplots(1, 2, figsize=(15, 5.5))
     for ax, lag in zip(axes, (2, 1)):
-        for label, frames, col in ((OLD_LABEL, mo, OLD_C), (NEW_LABEL, mn, NEW_C)):
+        for label, frames, col in series:
             t = hit_table(frames, lag)
             t = t[t.n >= min_n]
             ax.plot(t.index, t.h / t.n * 100, marker="o", label=label, color=col, lw=2)
@@ -107,11 +123,14 @@ def share_chart(mo, mn, path, min_n=20):
         ax.set_title(f"Share of a YC batch worth $\\geq$100M at its {lag}-year mark")
         ax.set_xlabel("YC batch year")
         ax.set_ylabel("% of companies with a valuation $\\geq$100M")
-        ax.legend()
+        if len(series) > 1:
+            ax.legend()
         ax.grid(alpha=0.3)
+    solo = series[0][0] if len(series) == 1 else None
     fig.suptitle(
         f"Top-tail outcome rate by batch year "
-        f"(batch-years with n$\\geq${min_n}; cleaned, strict window)",
+        f"(batch-years with n$\\geq${min_n}; cleaned, strict window)"
+        + (f" -- {solo} dataset" if solo else ""),
         y=1.0,
     )
     fig.tight_layout()
@@ -119,13 +138,10 @@ def share_chart(mo, mn, path, min_n=20):
     plt.close(fig)
 
 
-def mean_chart(mo, mn, path, min_n=20):
+def mean_chart(series, path, min_n=20):
     fig, axes = plt.subplots(1, 2, figsize=(15, 5.5))
     for ax, lag in zip(axes, (2, 1)):
-        for label, frames, col in (
-            (f"{OLD_LABEL} (June-2025 $)", mo, OLD_C),
-            (f"{NEW_LABEL} (June-2026 $)", mn, NEW_C),
-        ):
+        for label, frames, col in series:
             t = frames[lag].groupby("yc_year")["valuation_real"].agg(["mean", "size"])
             t = t[t["size"] >= min_n]
             ax.plot(t.index, t["mean"], marker="o", label=label, color=col, lw=2)
@@ -142,8 +158,11 @@ def mean_chart(mo, mn, path, min_n=20):
         ax.set_title(f"Mean {lag}-year post-YC valuation by batch year")
         ax.set_xlabel("YC batch year")
         ax.set_ylabel("mean valuation (log scale)")
-        ax.legend()
+        if len(series) > 1:
+            ax.legend()
         ax.grid(alpha=0.3)
+    if len(series) == 1:
+        fig.suptitle(f"{series[0][0]} dataset", y=1.0)
     fig.tight_layout()
     fig.savefig(path, dpi=140)
     plt.close(fig)
@@ -261,9 +280,18 @@ if __name__ == "__main__":
     new, _ = load("yc_valuations_2026.db", 2026, to26)
     mo, mn = marks(old, to25, True, True), marks(new, to26, True, True)
 
-    years, av, bv, den = count_chart(mo, mn, "rerun_count_100m_2yr.png")
-    share_chart(mo, mn, "rerun_share_100m.png")
-    mean_chart(mo, mn, "rerun_mean_by_year.png")
+    both = [(OLD_LABEL, mo, OLD_C), (NEW_LABEL, mn, NEW_C)]
+    just_new = [(NEW_LABEL, mn, NEW_C)]
+
+    # two-series charts: the two collections side by side
+    years, (av, bv), den = count_chart(both, "rerun_count_100m_2yr.png")
+    share_chart(both, "rerun_share_100m.png")
+    mean_chart(both, "rerun_mean_by_year.png")
+
+    # one-series charts: the current dataset only, no Aug-2025 comparison line
+    count_chart(just_new, "rerun_only_count_100m_2yr.png")
+    share_chart(just_new, "rerun_only_share_100m.png")
+    mean_chart(just_new, "rerun_only_mean_by_year.png")
 
     print(f"{'year':<6}{'n':>5}{'Aug-2025':>10}{'Sep-2026':>10}")
     for y, d, p, q in zip(years, den, av, bv):
@@ -291,5 +319,6 @@ if __name__ == "__main__":
 
     print(
         "\nwrote rerun_count_100m_2yr.png rerun_share_100m.png rerun_mean_by_year.png "
-        "rerun_single_vintage_2026.png"
+        "rerun_single_vintage_2026.png rerun_only_count_100m_2yr.png "
+        "rerun_only_share_100m.png rerun_only_mean_by_year.png"
     )

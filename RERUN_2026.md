@@ -88,7 +88,25 @@ batch year in the series, including the 2020-2021 ZIRP peak (8.9% / 4.8%).*
 
 ![mean valuation by batch year](rerun_mean_by_year.png)
 
-### The same view without any old data
+### One series only: the current dataset
+
+The charts above draw two bars or lines per batch year, one per collection. The
+same three figures with a single series — the Sep-2026 dataset, all batch years,
+no comparison line — are `rerun_only_count_100m_2yr.png`,
+`rerun_only_share_100m.png` and `rerun_only_mean_by_year.png`:
+
+![count, current dataset only](rerun_only_count_100m_2yr.png)
+
+![share, current dataset only](rerun_only_share_100m.png)
+
+![mean, current dataset only](rerun_only_mean_by_year.png)
+
+Read on its own, the series says: the top-tail rate collapsed for the 2022
+batches (1.1% at the 2-year mark, the worst of any year with a usable sample),
+then recovered to 7.8% for 2023 and 13.7% for 2024 — above the 2019-2020 peak of
+8.3-8.9%.
+
+### Only rows physically re-fetched today
 
 Both charts above mix collection vintages: pre-2023 batches carry their Aug-2025
 numbers while 2023+ batches were re-collected. This one uses *only* rows written
@@ -287,7 +305,7 @@ counterfactual, so "GenAI caused it" is not identified. Specific to this re-run:
 | `yc-scrape/fetch_yc_companies_2026.py` | directory scrape; pulls a live Algolia key (the key hardcoded in the original now 403s). 6,203 companies across 50 batches, up from 5,311 |
 | `yc_valuation_analyzer_2026.py` | collector: `claude-haiku-4-5`, current year 2026, concurrency + 429 backoff, per-call usage logged to an `api_usage` table |
 | `analysis_2026.py` | the original notebook as a parameterised script (db, inflation target, cutoff) + significance tests |
-| `plots_2026.py` | the four figures in this document |
+| `plots_2026.py` | every figure in this document |
 | `clean_and_report.py` | cleaning layer and the side-by-side comparison; `--raw` disables cleaning |
 | `vintage_check.py` | paired old-vs-new comparison helper |
 | `yc_valuations_2026.db` | re-collection. Original `yc_valuations.db` is untouched |
