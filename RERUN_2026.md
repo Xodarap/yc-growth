@@ -79,27 +79,38 @@ Counts fold cohort growth into the outcome — YC batch sizes grew roughly 30×
 over this period — so the same data as a *rate* is the fairer comparison, and it
 tells the same story:
 
-![top-tail outcome rate by batch year](rerun_share_100m.png)
+![top-tail outcome rate by batch year, 2-year mark](rerun_share_100m_2yr.png)
 
 *Pre-2023 batch-years were not re-collected, so the two lines coincide there by
 construction; the 2023-2025 points are where the new information is. The 2024
 batches now reach $100M at their 2-year mark more often (13.7%) than any earlier
 batch year in the series, including the 2020-2021 ZIRP peak (8.9% / 4.8%).*
 
-![mean valuation by batch year](rerun_mean_by_year.png)
+The same rate at the 1-year mark, which the original analysis also reports:
+
+![top-tail outcome rate by batch year, 1-year mark](rerun_share_100m_1yr.png)
+
+And the mean, at each mark:
+
+![mean valuation by batch year, 2-year mark](rerun_mean_by_year_2yr.png)
+
+![mean valuation by batch year, 1-year mark](rerun_mean_by_year_1yr.png)
 
 ### One series only: the current dataset
 
 The charts above draw two bars or lines per batch year, one per collection. The
-same three figures with a single series — the Sep-2026 dataset, all batch years,
-no comparison line — are `rerun_only_count_100m_2yr.png`,
-`rerun_only_share_100m.png` and `rerun_only_mean_by_year.png`:
+same figures with a single series — the Sep-2026 dataset, all batch years, no
+comparison line — are the `rerun_only_*.png` files:
 
 ![count, current dataset only](rerun_only_count_100m_2yr.png)
 
-![share, current dataset only](rerun_only_share_100m.png)
+![share at the 2-year mark, current dataset only](rerun_only_share_100m_2yr.png)
 
-![mean, current dataset only](rerun_only_mean_by_year.png)
+![share at the 1-year mark, current dataset only](rerun_only_share_100m_1yr.png)
+
+![mean at the 2-year mark, current dataset only](rerun_only_mean_by_year_2yr.png)
+
+![mean at the 1-year mark, current dataset only](rerun_only_mean_by_year_1yr.png)
 
 Read on its own, the series says: the top-tail rate collapsed for the 2022
 batches (1.1% at the 2-year mark, the worst of any year with a usable sample),
@@ -108,11 +119,14 @@ then recovered to 7.8% for 2023 and 13.7% for 2024 — above the 2019-2020 peak 
 
 ### Only rows physically re-fetched today
 
-Both charts above mix collection vintages: pre-2023 batches carry their Aug-2025
-numbers while 2023+ batches were re-collected. This one uses *only* rows written
-by the Sep-2026 pass, so one model on one day produced every number in it.
+Every chart above mixes collection vintages: pre-2023 batches carry their
+Aug-2025 numbers while 2023+ batches were re-collected. These two use *only*
+rows written by the Sep-2026 pass, so one model on one day produced every number
+in them. Same hits over the same denominators, as a count and as a share:
 
-![single collection vintage](rerun_single_vintage_2026.png)
+![single collection vintage, count](rerun_single_vintage_2026_count.png)
+
+![single collection vintage, share](rerun_single_vintage_2026_share.png)
 
 | batch year | 1-year mark | 2-year mark |
 |---|---|---|
@@ -305,7 +319,7 @@ counterfactual, so "GenAI caused it" is not identified. Specific to this re-run:
 | `yc-scrape/fetch_yc_companies_2026.py` | directory scrape; pulls a live Algolia key (the key hardcoded in the original now 403s). 6,203 companies across 50 batches, up from 5,311 |
 | `yc_valuation_analyzer_2026.py` | collector: `claude-haiku-4-5`, current year 2026, concurrency + 429 backoff, per-call usage logged to an `api_usage` table |
 | `analysis_2026.py` | the original notebook as a parameterised script (db, inflation target, cutoff) + significance tests |
-| `plots_2026.py` | every figure in this document |
+| `plots_2026.py` | every figure in this document, one chart per file |
 | `clean_and_report.py` | cleaning layer and the side-by-side comparison; `--raw` disables cleaning |
 | `vintage_check.py` | paired old-vs-new comparison helper |
 | `yc_valuations_2026.db` | re-collection. Original `yc_valuations.db` is untouched |
